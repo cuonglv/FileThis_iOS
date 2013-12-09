@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>HOST_NAMES</key>
+	<array>
+		<string>filethis.com</string>
+		<string>integration.filethis.com</string>
+		<string>staging.filethis.com</string>
+	</array>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleDisplayName</key>
+	<string>${PRODUCT_NAME}</string>
+	<key>CFBundleExecutable</key>
+	<string>${EXECUTABLE_NAME}</string>
+	<key>CFBundleIconFile</key>
+	<string>FT Mobile Application Icon.png</string>
+	<key>CFBundleIconFiles</key>
+	<array>
+		<string>Icon.png</string>
+		<string>Icon@2x.png</string>
+		<string>Icon-72.png</string>
+		<string>Icon-Small-50.png</string>
+		<string>Icon-Small.png</string>
+		<string>Icon-Small@2x.png</string>
+	</array>
+	<key>CFBundleIdentifier</key>
+	<string>com.filethis</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>${PRODUCT_NAME}</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string></string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>1.1.32</string>
+	<key>Connections</key>
+	<array>
+		<dict>
+			<key>last updated</key>
+			<string>Fetched 17 documents on Mon Apr 23 2012</string>
+			<key>name</key>
+			<string>Bank of America</string>
+		</dict>
+		<dict>
+			<key>last updated</key>
+			<string>Fetched 17 documents today at 8AM</string>
+			<key>name</key>
+			<string>Chase</string>
+		</dict>
+		<dict>
+			<key>last updated</key>
+			<string>Fetched 17 documents on Mon Apr 23 2012</string>
+			<key>name</key>
+			<string>E*Trade</string>
+		</dict>
+		<dict>
+			<key>last updated</key>
+			<string>Fetched 1 document yesterday</string>
+			<key>name</key>
+			<string>Fidelity</string>
+		</dict>
+	</array>
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<key>NSMainNibFile~ipad</key>
+	<string>MainWindow</string>
+	<key>UIMainStoryboardFile</key>
+	<string>MainStoryboard~iphone</string>
+	<key>UIStatusBarHidden</key>
+	<false/>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+</dict>
+</plist>
