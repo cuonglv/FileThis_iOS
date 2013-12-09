@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Scheme
+   LastUpgradeVersion = "0500"
+   version = "1.7">
+   <BuildAction
+      parallelizeBuildables = "YES"
+      buildImplicitDependencies = "YES">
+      <BuildActionEntries>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "1D6058900D05DD3D006BFB54"
+               BuildableName = "FileThis.app"
+               BlueprintName = "FileThis"
+               ReferencedContainer = "container:FileThis.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+      </BuildActionEntries>
+   </BuildAction>
+   <TestAction
+      selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
+      selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      shouldUseLaunchSchemeArgsEnv = "YES"
+      buildConfiguration = "Debug">
+      <Testables>
+      </Testables>
+      <MacroExpansion>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "1D6058900D05DD3D006BFB54"
+            BuildableName = "FileThis.app"
+            BlueprintName = "FileThis"
+            ReferencedContainer = "container:FileThis.xcodeproj">
+         </BuildableReference>
+      </MacroExpansion>
+   </TestAction>
+   <LaunchAction
+      selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
+      selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      launchStyle = "0"
+      useCustomWorkingDirectory = "NO"
+      buildConfiguration = "Debug"
+      ignoresPersistentStateOnLaunch = "NO"
+      debugDocumentVersioning = "YES"
+      allowLocationSimulation = "YES">
+      <BuildableProductRunnable>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "1D6058900D05DD3D006BFB54"
+            BuildableName = "FileThis.app"
+            BlueprintName = "FileThis"
+            ReferencedContainer = "container:FileThis.xcodeproj">
+         </BuildableReference>
+      </BuildableProductRunnable>
+      <AdditionalOptions>
+         <AdditionalOption
+            key = "MallocScribble"
+            value = ""
+            isEnabled = "YES">
+         </AdditionalOption>
+         <AdditionalOption
+            key = "MallocGuardEdges"
+            value = ""
+            isEnabled = "YES">
+         </AdditionalOption>
+         <AdditionalOption
+            key = "USERBREAK"
+            value = "1"
+            isEnabled = "YES">
+         </AdditionalOption>
+         <AdditionalOption
+            key = "NSZombieEnabled"
+            value = "YES"
+            isEnabled = "YES">
+         </AdditionalOption>
+      </AdditionalOptions>
+   </LaunchAction>
+   <ProfileAction
+      shouldUseLaunchSchemeArgsEnv = "YES"
+      savedToolIdentifier = ""
+      useCustomWorkingDirectory = "NO"
+      buildConfiguration = "Release"
+      debugDocumentVersioning = "YES">
+      <BuildableProductRunnable>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "1D6058900D05DD3D006BFB54"
+            BuildableName = "FileThis.app"
+            BlueprintName = "FileThis"
+            ReferencedContainer = "container:FileThis.xcodeproj">
+         </BuildableReference>
+      </BuildableProductRunnable>
+   </ProfileAction>
+   <AnalyzeAction
+      buildConfiguration = "Debug">
+   </AnalyzeAction>
+   <ArchiveAction
+      buildConfiguration = "Release"
+      revealArchiveInOrganizer = "YES">
+      <PostActions>
+         <ExecutionAction
+            ActionType = "Xcode.IDEStandardExecutionActionsCore.ExecutionActionType.ShellScriptAction">
+            <ActionContent
+               title = "Run Script"
+               scriptText = "APPLICATION_NAME=$TARGET_NAME&#10;echo  &quot;${APPLICATION_NAME} Post-action&quot;&#10;&#10;BUILD_DIR=&quot;${PROJECT_DIR}&quot;/build&#10;echo  &quot;build dir is ${BUILD_DIR}&quot; &gt;&gt; /tmp/woot&#10;# mkdir -p &quot;${BUILD_DIR}&#10;&#10;echo &quot;ARCHIVE_PATH=\&quot;$ARCHIVE_PATH\&quot;&quot; &gt; $BUILD_DIR/archive_paths.sh&#10;echo &quot;ARCHIVE_PRODUCTS_PATH=\&quot;$ARCHIVE_PRODUCTS_PATH\&quot;&quot; &gt;&gt; $BUILD_DIR/archive_paths.sh&#10;echo &quot;ARCHIVE_DSYMS_PATH=\&quot;$ARCHIVE_DSYMS_PATH\&quot;&quot; &gt;&gt; $BUILD_DIR/archive_paths.sh&#10;echo &quot;INFOPLIST_PATH=\&quot;$INFOPLIST_PATH\&quot;&quot; &gt;&gt; $BUILD_DIR/archive_paths.sh&#10;echo &quot;APPLICATION_NAME=\&quot;$APPLICATION_NAME\&quot;&quot; &gt;&gt; $BUILD_DIR/archive_paths.sh&#10;&#10;&#10;/usr/bin/xcrun -sdk iphoneos PackageApplication -v &quot;${ARCHIVE_PRODUCTS_PATH}/Applications/${APPLICATION_NAME}.app&quot; -o &quot;${BUILD_DIR}/${APPLICATION_NAME}.ipa&quot;&#10;cp -R &quot;${ARCHIVE_DSYMS_PATH}/${APPLICATION_NAME}.app.dSYM&quot; ${BUILD_DIR}&#10;&#10;echo &quot;Done building $APPLICATION_NAME&quot; &gt;&gt; $BUILD_DIR/archive_paths.sh&#10;"
+               shellToInvoke = "/bin/sh -x">
+               <EnvironmentBuildable>
+                  <BuildableReference
+                     BuildableIdentifier = "primary"
+                     BlueprintIdentifier = "1D6058900D05DD3D006BFB54"
+                     BuildableName = "FileThis.app"
+                     BlueprintName = "FileThis"
+                     ReferencedContainer = "container:FileThis.xcodeproj">
+                  </BuildableReference>
+               </EnvironmentBuildable>
+            </ActionContent>
+         </ExecutionAction>
+      </PostActions>
+   </ArchiveAction>
+</Scheme>
