@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>68C06CF5-3F76-4717-AB54-B20C40880C31</string>
+	<key>IDESourceControlProjectName</key>
+	<string>FileThis</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>F39D9DF0-847F-46C2-8D23-FF79CF68A852</key>
+		<string>https://github.com/caohuuloc/mobile.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>iOS/FileThis.xcodeproj/project.xcworkspace</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>F39D9DF0-847F-46C2-8D23-FF79CF68A852</key>
+		<string>../../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://github.com/caohuuloc/mobile.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>110</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>F39D9DF0-847F-46C2-8D23-FF79CF68A852</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>F39D9DF0-847F-46C2-8D23-FF79CF68A852</string>
+			<key>IDESourceControlWCCName</key>
+			<string>mobile</string>
+		</dict>
+	</array>
+</dict>
+</plist>

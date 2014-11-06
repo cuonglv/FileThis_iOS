@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="4510" systemVersion="13E28" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES">
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="3742"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="AdjustPhotoViewController">
+            <connections>
+                <outlet property="adjustPhotoButton" destination="rms-rx-28Y" id="bgB-2I-LDH"/>
+                <outlet property="adjustPhotoControlsContainterView" destination="jz6-t6-RoY" id="ugf-ci-TtK"/>
+                <outlet property="bottomContainerView" destination="xuN-aD-wJi" id="0JA-w4-8Eo"/>
+                <outlet property="brightnessSlider" destination="fAu-ch-wBX" id="duT-9d-rRW"/>
+                <outlet property="contrastSlider" destination="gyF-wX-ct7" id="Gf8-bX-zhg"/>
+                <outlet property="convertToGrayscaleSwitch" destination="Q2E-h8-16C" id="TLn-J9-VPH"/>
+                <outlet property="keepOriginalButton" destination="pQb-bQ-Gst" id="AYC-5W-xBB"/>
+                <outlet property="scrollView" destination="If5-xu-a9e" id="M6L-Xi-aYK"/>
+                <outlet property="topVerticalSpacingConstraint" destination="GMP-vA-9yB" id="OKh-Nn-ThP"/>
+                <outlet property="view" destination="FRl-5O-Czb" id="tUA-rb-Feo"/>
+            </connections>
+        </placeholder>
+        <view contentMode="scaleToFill" id="FRl-5O-Czb">
+            <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <subviews>
+                <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="xuN-aD-wJi">
+                    <rect key="frame" x="0.0" y="413" width="320" height="155"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                    <subviews>
+                        <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="jz6-t6-RoY">
+                            <rect key="frame" x="49" y="39" width="223" height="108"/>
+                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            <subviews>
+                                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Convert to grayscale" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="V8g-ZN-Blr">
+                                    <rect key="frame" x="3" y="8" width="159" height="21"/>
+                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                    <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                    <nil key="highlightedColor"/>
+                                </label>
+                                <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Q2E-h8-16C">
+                                    <rect key="frame" x="170" y="3" width="51" height="31"/>
+                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                    <color key="tintColor" red="1" green="0.40000000000000002" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                    <connections>
+                                        <action selector="handleConvertToGrayscaleSwitchValueChanged:" destination="-1" eventType="valueChanged" id="Fbd-PT-ciQ"/>
+                                    </connections>
+                                </switch>
+                                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Brightness" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="vtZ-fJ-XxN">
+                                    <rect key="frame" x="3" y="42" width="82" height="21"/>
+                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                    <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                    <nil key="highlightedColor"/>
+                                </label>
+                                <slider opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.90000000000000002" minValue="0.0" maxValue="2" translatesAutoresizingMaskIntoConstraints="NO" id="fAu-ch-wBX">
+                                    <rect key="frame" x="91" y="36" width="130" height="34"/>
+                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                    <color key="tintColor" red="1" green="0.40000000000000002" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                    <connections>
+                                        <action selector="handleBrightnessSliderValueChanged:" destination="-1" eventType="valueChanged" id="6fe-1S-kae"/>
+                                    </connections>
+                                </slider>
+                                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Contrast" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="L3O-2Z-m8r">
+                                    <rect key="frame" x="3" y="77" width="67" height="21"/>
+                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                    <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                    <nil key="highlightedColor"/>
+                                </label>
+                                <slider opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="1.2" minValue="0.0" maxValue="2" translatesAutoresizingMaskIntoConstraints="NO" id="gyF-wX-ct7">
+                                    <rect key="frame" x="91" y="71" width="130" height="34"/>
+                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                    <color key="tintColor" red="1" green="0.40000000000000002" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                    <connections>
+                                        <action selector="handleContrastSliderValueChanged:" destination="-1" eventType="valueChanged" id="rBJ-Ve-4VC"/>
+                                    </connections>
+                                </slider>
+                            </subviews>
+                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                        </view>
+                        <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="pQb-bQ-Gst">
+                            <rect key="frame" x="19" y="0.0" width="141" height="31"/>
+                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            <color key="backgroundColor" red="0.87058823529411766" green="0.87058823529411766" blue="0.87058823529411766" alpha="1" colorSpace="calibratedRGB"/>
+                            <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                            <state key="normal" title="Keep Original">
+                                <color key="titleColor" red="1" green="0.40000000000000002" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                            </state>
+                            <connections>
+                                <action selector="handleKeepOriginButton:" destination="-1" eventType="touchUpInside" id="zuE-EU-ckF"/>
+                            </connections>
+                        </button>
+                        <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="rms-rx-28Y">
+                            <rect key="frame" x="161" y="0.0" width="141" height="31"/>
+                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            <color key="backgroundColor" red="1" green="0.40000000000000002" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                            <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                            <state key="normal" title="Adjust Photo">
+                                <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                            </state>
+                            <connections>
+                                <action selector="handleAdjustPhotoButton:" destination="-1" eventType="touchUpInside" id="ZTo-Ky-rSM"/>
+                            </connections>
+                        </button>
+                    </subviews>
+                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                    <constraints>
+                        <constraint firstAttribute="width" constant="320" id="itJ-JZ-Ln9"/>
+                        <constraint firstAttribute="height" constant="155" id="ucw-le-L2C"/>
+                    </constraints>
+                </view>
+                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Adjusting photo is recommended for text recognition" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="UYC-kG-LxO">
+                    <rect key="frame" x="16" y="62" width="288" height="22"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="22" id="9ph-Uf-gMt"/>
+                        <constraint firstAttribute="width" constant="288" id="fEL-lq-dLR"/>
+                    </constraints>
+                    <fontDescription key="fontDescription" type="italicSystem" pointSize="11"/>
+                    <nil key="highlightedColor"/>
+                </label>
+                <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="TopLeft" translatesAutoresizingMaskIntoConstraints="NO" id="If5-xu-a9e">
+                    <rect key="frame" x="11" y="85" width="299" height="320"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
+                </scrollView>
+            </subviews>
+            <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+            <constraints>
+                <constraint firstAttribute="bottom" secondItem="xuN-aD-wJi" secondAttribute="bottom" id="2Jn-oG-Oof"/>
+                <constraint firstAttribute="centerX" secondItem="UYC-kG-LxO" secondAttribute="centerX" id="5g8-MX-axb"/>
+                <constraint firstItem="UYC-kG-LxO" firstAttribute="top" secondItem="FRl-5O-Czb" secondAttribute="top" constant="62" id="GMP-vA-9yB"/>
+                <constraint firstAttribute="trailing" secondItem="If5-xu-a9e" secondAttribute="trailing" constant="10" id="TSG-Sp-nh5"/>
+                <constraint firstAttribute="bottom" secondItem="xuN-aD-wJi" secondAttribute="bottom" id="kfk-Je-CLo"/>
+                <constraint firstItem="xuN-aD-wJi" firstAttribute="top" secondItem="If5-xu-a9e" secondAttribute="bottom" constant="8" id="nMv-GV-v7g"/>
+                <constraint firstAttribute="centerX" secondItem="xuN-aD-wJi" secondAttribute="centerX" id="sVr-M8-4Fv"/>
+                <constraint firstItem="If5-xu-a9e" firstAttribute="leading" secondItem="FRl-5O-Czb" secondAttribute="leading" constant="11" id="tvv-Tr-gaE"/>
+                <constraint firstItem="If5-xu-a9e" firstAttribute="top" secondItem="UYC-kG-LxO" secondAttribute="bottom" constant="1" id="upJ-7E-8ag"/>
+            </constraints>
+            <simulatedScreenMetrics key="simulatedDestinationMetrics" type="retina4"/>
+        </view>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+    </objects>
+</document>

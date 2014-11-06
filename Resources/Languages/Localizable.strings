@@ -1,0 +1,302 @@
+/* 
+  Localizable.strings
+  FileThis
+
+  Created by Drew Wilson on 12/3/12.
+
+*/
+
+"Your account has been created" = "Almost finished, just need to confirm your email address. To complete the subscription process, please click the link in the email we've sent you and then come back here to login.";
+
+"Cannot connect to iTunes Store." = "Cannot connect to iTunes Store. Please try again later.";
+
+"prem" = "Premium Monthly";
+"prea" = "Premium Yearly";
+"prew" = "Premium Weekly";
+"ultm" = "Ultimate Monthly";
+"ulta" = "Ultimate Yearly";
+"ultw" = "Ultimate Weekly";
+"none" = "Basic";
+
+"Cannot add connection because subscription expired." = "Your subscription has expired. Before you can create a new connection, please renew your FileThis subscription.";
+
+// SubscriptionView upgrade button titles
+"monthly" = "per month";
+"annually" = "per year";
+
+// @"missing destination"
+"please configure your destination" = "Welcome to FileThis!\n\nPlease select the cloud file storage destination where you would like FileThis to deliver your documents.";
+
+// COMMON
+"ID_CLEAR"  = "Clear";
+"ID_YES"    = "Yes";
+"ID_NO"     = "No";
+"ID_EDIT"   = "Edit";
+"ID_REMOVE" = "Remove";
+"ID_FROM_UPPERCASE" = "FROM";
+"ID_TO_UPPERCASE" = "TO";
+"ID_DOCUMENTS_LOWERCASE"  =   "documents";
+"ID_DOCUMENT_LOWERCASE"  =   "document";
+"ID_OF" = "of";
+"ID_SAVING" =   "Saving...";
+"ID_SAVING_DATA" =   "Saving data...";
+"ID_CONNECTIONS" = "Connections";
+"ID_I_DOCUMENTS"    =   "%d documents";
+"ID_VIEW_ALL"   =   "View All";
+"ID_BACK"   =   "Back";
+"ID_WARNING"   =   "Warning";
+"ID_FINISH"   =   "Finish";
+"ID_UPLOAD"   =   "Upload";
+"ID_DONE"   =   "Done";
+"ID_OK"   =   "OK";
+"ID_CONFIRM"   =   "Confirm";
+"ID_INFO"   =   "Info";
+"ID_CANCEL" =   "Cancel";
+"ID_DELETE" =   "Delete";
+
+// COMMON ALERT
+"ID_WARNING_CANNOT_SAVE_DATA"   = "Cannot save data";
+"ID_WARNING_CANNOT_REMOVE_DATA" = "Cannot remove data";
+"ID_WARNING_CANNOT_LOAD_DATA"   = "Cannot load data";
+"ID_CONFIRM_REMOVE_DATA"        = "Do you want to remove data?";
+
+"ID_WARNING_CANNOT_LOAD_TAG_LIST"       = "Cannot load Tag list";
+"ID_WARNING_CANNOT_LOAD_CABINET_LIST"   = "Cannot load Cabinet list";
+"ID_WARNING_CANNOT_LOAD_ACCOUNT_LIST"   = "Cannot load Account list";
+"ID_WARNING_CANNOT_LOAD_DOCUMENT_LIST"  = "Cannot load Document list";
+"ID_CONFIRM_STOP_LOADING_DATA"          = "Do you want to stop loading data?";
+
+// LOGIN & SIGN-UP SCREENS
+"ID_LOGIN_TO_FILETHIS"  =   "Login to FileThis";
+"ID_ENTER_EMAIL"    =   "Enter email address";
+"ID_PASSWORD"   =   "Password";
+"ID_FORGOT_PASSWORD_QUESTION"    =   "Forgot Password?";
+"ID_FORGOT_PASSWORD"    =   "Forgot Password";
+"ID_LOGIN"  =   "Login";
+"ID_OR" =   "Or";
+"ID_SIGNUP_A_NEW_ACC"   =   "Sign up a new account";
+"ID_LEARN_MORE" =   "Learn more about FileThis";
+"ID_LEARN_MORE_COMPACT" =   "Learn more";
+"ID_TRY_OUR"   =   "Try our";
+"ID_FREE"   =   "Forever Free";
+"ID_VERSION" =   "version!";
+"ID_FIRST_NAME" =   "First name";
+"ID_LAST_NAME" =   "Last name";
+"ID_EMAIL" =   "Email";
+"ID_TERM_SERVICE"   =   "Terms of Service";
+"ID_PRIVACY"    =   "Privacy Policy";
+"ID_SIGN_UP"    =   "Sign Up";
+"ID_INVALID_EMAIL"  =   "Invalid Email!";
+"ID_INVALID_PASSWORD"   =   "Invalid Password!";
+"ID_VERIFY" =   "Verify";
+"ID_INVALID_FIRST_NAME" =   "Invalid First Name!";
+"ID_INVALID_LAST_NAME" =   "Invalid Last Name!";
+"ID_PASSWORD_LENGTH"    =   "Password must be at least %d characters and must contain at least one number and one letter.";
+"ID_PASSWORD_NOT_MATCH" =   "Passwords don't match.";
+"ID_ACCOUNT_CREATED"    =   "Almost finished, just need to confirm your email address. To complete the subscription process, please click the link in the email we've sent you and then come back here to login.";
+"ID_ABOUT_FILETHIS" =   "About FileThis";
+"ID_AGREE_TERM_SERVICES1"    =   "By tapping \"Sign up\",";
+"ID_AGREE_TERM_SERVICES2"    =   "you agree to";
+
+// FORGOT PASSWORD
+"ID_NEW_PASSWORD"               = "New password";
+"ID_RETYPE_NEW_PASSWORD"        = "Re-type new password";
+"ID_FORGOT_PASSWORD_FINISHED"   = "Almost finished. We have emailed further instructions to you. Please check your email and follow those instructions.";
+"ID_GENERATING_EMAIL"           = "Generating email...";
+
+// ONBOARDING SCREENS
+"ID_COMING_SOON" = "Coming soon";
+"ID_GET_MOST_OUT_FILETHIS"   =   "Get the most out of FileThis";
+"ID_ONBOARD1_TEXT1" =   "Automatically and securely fetch your";
+"ID_ONBOARD1_TEXT2" =   "statements, bills, invoices and documents";
+"ID_ONBOARD2_TEXT1" =   "Delivers your documents to";
+"ID_ONBOARD2_TEXT2" =   "the storage location of your choice";
+"ID_ONBOARD3_TEXT1" =   "Your documents in one place. Find everything instantly.";
+"ID_ONBOARD3_TEXT2" =   "Even from closed accounts";
+
+// DOCUMENT SCREENS
+"ID_DOCUMENT_INFO"  =   "     Document Info";
+"ID_NUMBER_PAGES"   =   "Numbers of pages:";
+"ID_FILE_SIZE"  =   "File Size:";
+"ID_ADDED_DATE" =   "Added Date:";
+"ID_CREATED_DATE"   =   "Created Date:";
+"ID_RELEVANT"   =   "Relevant:";
+"ID_TAGS"   =   "Tags:";
+"ID_TAGS_NO_DOT"    =   "Tags";
+"ID_CLOSE"  =   "Close";
+"ID_SAVE"   =   "Save";
+"ID_INVALID_FILE_NAME"  =   "Invalid Name!";
+"ID_INVALID_RELEVANT"  =   "Invalid Relevant Date!";
+"ID_SELECT_TAGS"    =   "Select to add tags";
+"ID_ADD_THIS_TAG"   =   "Add this tag";
+"ID_TAG_EXISTED"    =   "Tag, cabinet and account names must be unique. This name is already in use.";
+"ID_CABINET_EXISTED"    =   "Tag, cabinet and account names must be unique. This name is already in use.";
+"ID_DELETE_DOC_CONFIRM" =   "Are you sure you want to delete the selected documents?";
+"ID_I_DOCUMENTS_FOUND"  =   "%d document(s) were found";
+"ID_SEARCH_RESULT"  =   "Search Result";
+
+"ID_I_DOCUMENTS_IN_CAB" =   "%d documents";
+"ID_I_DOCUMENT_IN_CAB" =   "%d document";
+
+"ID_I_DOCUMENTS_IN_SEARCH_RESULT" =   "%d documents in search result";
+"ID_I_DOCUMENT_IN_SEARCH_RESULT" =   "%d document in search result";
+
+"ID_CABINET"    =   "Cabinet";
+"ID_SELECT" =   "Select";
+"ID_SELECT_DOCUMENT_FIRST"  =   "Please select a document first";
+"ID_READ_OUR" = "Read our";
+"ID_ACCOUNT"   =   "Account";
+"ID_ACCOUNTS"   =   "Accounts";
+"ID_CABINETS"   =   "Cabinets";
+"ID_SHARE"  =   "Share";
+"ID_SEARCH" =   "Search";
+"ID_VIEW_OPTIONS"   =   "View options";
+"ID_VIEW_OPTIONS_SEG"   =   "VIEW OPTIONS";
+"ID_VIEW"   =   "View";
+"ID_SEARCH_IN_DOC"  =   "Search in document";
+"ID_TYPE_WORDS_OR_WORD" =   "Type words or word phrase to search";
+
+"ID_I_DOCUMENTS_IN_ACC" =   "%d documents in this account";
+"ID_I_DOCUMENT_IN_ACC" =   "%d document in this account";
+
+"ID_ADD_THIS_CABINET"   =   "Add this cabinet";
+"ID_SELECT_CABINETS"    =   "Select to add cabinets";
+"ID_LOADING_DATA"   =   "Loading data...";
+"ID_DOCUMENTS"  =   "Documents";
+"ID_DESTINATION"    =   "Destination";
+"ID_LOGOUT" =   "Log out";
+"ID_OPTIONS"    =   "Options";
+"ID_SORT_BY"    =   "SORT DOCUMENTS IN CABINETS BY";
+"ID_THUMBS" =   "Thumbs";
+"ID_SNIPPETS"   =   "Snippets";
+"Name_A_Z"  =   "Name A - Z";
+"Name_Z_A"  =   "Name Z - A";
+"RelevantDate_NewestFirst"  =   "Relevant Date, newest first";
+"RelevantDate_OldestFirst"  =   "Relevant Date, oldest first";
+"DateCreated_NewestFirst"  =   "Date Created, newest first";
+"DateCreated_OldestFirst"=  "Date Created, oldest first";
+"DateAdded_NewestFirst"  =   "Date Added, newest first";
+"DateAdded_OldestFirst"=  "Date Added, oldest first";
+"ID_AUTHENTICATING" =   "Authenticating...";
+"ID_DELETING_DOCUMENTS" =   "Deleting documents...";
+"ID_CREATING_USER"  =   "Creating user...";
+"ID_DOCUMENT_VIEW_OPTIONS"= "DOCUMENT VIEW OPTIONS";
+"ID_SINGLE_PAGE"    =   "Single page";
+"ID_DOUBLE_PAGES"    =   "Double pages";
+"ID_SELECT_ALL" =   "Select All";
+"ID_CONFIRM_REMOVE_TAG_S" = "You are about to delete the tag '%@'. This will delete the tag and remove it from all documents containing this tag.";
+"ID_CONFIRM_REMOVE_CABINET_S" = "You are about to delete the Cabinet '%@'. This will delete the Cabinet and remove all documents from this Cabinet";
+"ID_WARNING_UNABLE_TO_DOWNLOAD_DOCUMENT_CONTENT" = "Unable to download document content";
+"ID_PLEASE_TRY_AGAIN_LATER" = "Please try again later";
+"ID_WARNING_UNABLE_TO_LOAD_DOCUMENT_CONTENT" = "Unable to load document content. Please try again later.";
+"ID_PLEASE_INPUT_A_TAG_NAME"        =   "Please input a tag name";
+"ID_PLEASE_INPUT_A_CABINET_NAME"    =   "Please input a cabinet name";
+
+// DOCUMENT SEARCH SCREEN
+"ID_TAP_TO_SELECT" = "Tap to select";
+"ID_SEARCH_BY_UPPERCASE" = "SEARCH BY";
+"ID_SEARCH_IN_UPPERCASE" = "SEARCH IN";
+"ID_SEARCH_NOW" = "Search now";
+"ID_WITH_TAGS_UPPERCASE" = "WITH TAGS";
+"ID_TAGS_UPPERCASE" = "TAGS";
+"ID_YOU_ARE_SEARCHING_FOR" = "You are searching for...";
+"ID_RECENT_SEARCH" = "Recent search";
+"ID_YEAR" = "Year";
+"ID_MONTH" = "Month";
+"ID_DAY" = "Day";
+"ID_DESTINATION_NEEDS_ATTENTION" = "Destination needs attention";
+"ID_DESTINATION_WARNING_MESSAGE" = "Before you can use FileThis you must first fix your connection to %@";
+"ID_WAITING_FOR_YOUR_AUTHORIZATION" = "Waiting for your authorization";
+"ID_WARNING_ENTER_SEARCH_CRITERIA" = "Please enter search criteria";
+"ID_CONFIRM_CLEAR_RECENT_SEARCH_LIST" = "Do you want to clear recent search list?";
+"ID_SEARCH_BY_DATE" = "Search by Date";
+"ID_BY_CABINET" = "by Cabinet";
+"ID_WITH_TAGS" = "with Tags";
+
+// UPLOAD SCREEN
+"ID_PHOTO_LIBRARY" = "Photo library";
+"ID_SCAN" = "Scan";
+"ID_SNAPSHOT" = "Snapshot";
+"ID_NO_PHOTO_TAKEN" = "You can create and upload your document by selecting photos from Photo Library \nor taking snapshots, tap the buttons on the tab bar below to proceed.";
+"ID_CONFIRM_DELETE_PHOTO" = "Do you want to remove photo?";
+"ID_EDIT_OR_DELETE_YOUR_PHOTO" = "Edit or remove photo";
+"ID_RESIZE_ROTATE_YOUR_PHOTO" = "Resize and/or rotate your photo";
+"ID_PHOTOS_GUIDE" = "Touch on a photo to edit.\nTouch, hold and move a photo to re-order.";
+"ID_WARNING_PHOTO_MINIMUM_SIZE" = "Your photo is too small";
+"ID_WARNING_TAKE_PHOTO_FIRST" = "Please take photo first";
+"ID_WARNING_ENTER_DOCUMENT_NAME" = "Please enter a name of document";
+"ID_WARNING_TOTAL_UPLOADED_DATA_SIZE" = "Exceed limit of total data size. Please remove photo first before adding more.";
+"ID_WARNING_EXCEED_AVAILABLE_SPACE" = "Before we deliver more documents, you'll need to add more storage space.\nThere are two ways to get more: You can upgrade your subscription, or you can invite a friend to use FileThis.";
+
+// RECENT SCREEN
+"ID_RECENT" = "Recent";
+"ID_RETRY" = "Retry";
+"ID_PREMIUM_TITLE"  =   "Get the most out of FileThis";
+"ID_PREMIUM_PRICE"  =   "Just %@ per month";
+"ID_PREMIUM"    =   "Go Ultimate";
+"ID_RECENT_DOCUMENTS"   =   "Recent Documents";
+"ID_RECENTLY_ADDED" =   "Recently Added";
+"ID_UPLOAD_ANOTHER" = "Upload another";
+"ID_GO_TO_RECENT" = "Go to Recent";
+
+// DESTINATION WELCOME SCREEN
+"ID_WELCOME_TO_FILETHIS" = "Welcome to FileThis !";
+"ID_DESTINATION_WELCOME_GUIDE1" = "To get started, let's pick a destination for\nstoring and managing your documents";
+"ID_DESTINATION_WELCOME_GUIDE2" = "The default destination is FileThis Cloud,\nwhich provides expert tools for searching,\nsorting and organizing your documents.";
+"ID_DESTINATION_WELCOME_GUIDE3" = "If you are accustomed to using another\ndocument management system, such as\nEvernote or Dropbox, you can select a\ndifferent destination.";
+"ID_USE_FILETHIS_CLOUD" = "Use FileThis Cloud";
+"ID_CHANGE_DESTINATION" = "Change Destination";
+
+// CONNECTIONS WELCOME SCREEN
+"ID_CONNECTIONS_WELCOME_GUIDE1"     = "PERFECT. You have chosen your destination,\nlet's add connections";
+"ID_CONNECTIONS_WELCOME_GUIDE1B"    = "Let's add connections";
+"ID_CONNECTIONS_WELCOME_GUIDE2"     = "            After adding a Connection, FileThis will access your accounts and fetch your documents.\n\nThe first time that an account is accessed historical documents will be fetched.  In some cases you may have a lot of historical documents so this may take some time.\n\nPlease be patient while FileThis securely fetches your historical documents.";
+"ID_NOTE_COLON" = "Note:";
+"ID_ADD_CONNECTION" = "Add Connection";
+"ID_PDF_TYPE_WARNING"   =   "Only Viewing of PDF document types is supported";
+"ID_NO_INTERNET_CONNECTION" =   "You are not connected to the internet.  Please connect to the internet to login to FileThis.";
+"ID_NO_INTERNET_CONNECTION2"    =   "No internet connection!";
+
+// WIZARD
+"ID_GOT_IT"                     = "Got it !";
+
+"ID_DOCUMENT_BLANK_TEXT1"   =   "FileThis has delivered documents to your %@ account.";
+"ID_DOCUMENT_BLANK_TEXT2"   =   "To view your document on the %@ app, tap the button below";
+"ID_OPEN_DOCUMENTS_ON"  =   "Open documents on %@";
+"ID_APP_NOT_INSTALLED"  =   "The %@ application is not installed on this device";
+"ID_SELECTING_DOCUMENTS"    =   "Selecting documents...";
+
+"ID_ADD_TO_CABINET"  =  "Add to Cabinets";
+"ID_EDIT_CABINET"   =   "Edit Cabinets";
+"ID_EDIT_TAG"  = "Edit Tags";
+"ID_DOCUMENT_SHARE_SUBJECT" =   "Document Shared From FileThis";
+"ID_CANNOT_ADD_CABINET" =   "Cannot add new cabinet. Please recheck your data.";
+"ID_CANNOT_REMOVE_CABINET"  =   "Cannot remove the cabinet. Please recheck your data.";
+"ID_CANNOT_ADD_TAG" =   "Cannot add new tag. Please recheck your data.";
+"ID_CANNOT_REMOVE_TAG" =   "Cannot remove the tag. Please recheck your data.";
+
+//Others
+"ID_COMMUNICATION_COMMON_ERROR" = "FileThis is down temporarily for maintenance. Please check back in a while.";
+"ID_CONNECTION_BEING_PROCESSED" = "The connection in being processed... Please wait!";
+"ID_OPEN_IN" = "Open in";
+"ID_CONNECTION_WAIT_TO_EDIT" = "Connection is currently running. Please wait to edit";
+"ID_SEND" = "Send";
+
+//CRP Program
+"ID_USAGE_VIEW_TITLE" = "Usage View";
+"ID_USAGE_DETAIL" = "Tap to view detail";
+"ID_INVITE_TO_EARN_MORE" = "Want to earn up to 40 free connections and 20 GB of free space on FileThis Cloud?";
+"ID_INVITE_FRIEND" = "Invite a Friend";
+"ID_STORAGE" = "Storage";
+"ID_YOU_ARE_USING" = "You're using";
+"ID_CONNECTION" = "Connection";
+"ID_GB" = "GB";
+"ID_MB" = "MB";
+"ID_BTN_UPGRADE" = "UPGRADE";
+"ID_REFERRALS" = "Referrals";
+"ID_EXPIRES" = "Expires";
+"ID_GET_MORE_STORAGE" = "Get more storage and more connections!";
+"ID_WARNING_EXCEED_CONNECTION" = "Before we deliver more documents to you, you'll need to get more connections.\nThere are two ways to get more: You can upgrade your subscription, or you can invite a friend to use FileThis.";
+"ID_OPTION_UPGRADE" = "Upgrade your plan";
+"ID_OPTION_INVITE" = "Refer a new customer";
+"ID_USAGE" = "Usage";

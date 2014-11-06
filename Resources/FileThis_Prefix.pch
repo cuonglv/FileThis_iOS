@@ -1,0 +1,24 @@
+//
+// Prefix header for all source files of the 'FTMobile' target in the 'FTMobile' project
+//
+
+#ifdef __OBJC__
+    #import <Foundation/Foundation.h>
+    #import <UIKit/UIKit.h>
+    #import <SystemConfiguration/SystemConfiguration.h>
+    #import <MobileCoreServices/MobileCoreServices.h>
+#endif
+
+// comment out DEBUG to disable
+//#define DEBUG       1
+
+// set following to 0 to disable
+#define AUTO_LOGIN  0
+//#define SANDBOX     1
+#define _AFNETWORKING_ALLOW_INVALID_SSL_CERTIFICATES_ 1
+
+#ifdef DEBUG
+    @interface UIView (DebugExtensions)
+    - (NSString *)recursiveDescription;
+    @end
+#endif
