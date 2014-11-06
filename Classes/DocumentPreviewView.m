@@ -121,7 +121,7 @@
     
     NSURL *urlServerReq = [NSURL URLWithString:[kServer stringByAppendingFormat:@"ticket=%@&op=download&id=%i",[CommonVar ticket],iDocId]];
     //NSLog(@"DocPreview - load doc from server URL: %@", urlServerReq);
-    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:urlServerReq cachePolicy: NSURLCacheStorageNotAllowed timeoutInterval: 30];
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:urlServerReq cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:60];
     [request setHTTPMethod:@"GET"];
     //NSURLResponse *response = nil;
     //NSError *err = nil;
@@ -189,7 +189,7 @@
 }
 
 - (void)displayDocInWebView:(NSURL*)url {
-    NSMutableURLRequest *requestLocal = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLCacheStorageAllowed timeoutInterval: 30];
+    NSMutableURLRequest *requestLocal = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:60];
     [requestLocal setHTTPMethod:@"GET"];
     [myWebView loadRequest:requestLocal];
 }

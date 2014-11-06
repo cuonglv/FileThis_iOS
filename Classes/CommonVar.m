@@ -9,6 +9,7 @@
 #import "CommonVar.h"
 #import "CommonFunc.h"
 #import "KKPasscodeLock.h"
+#import "SortCriteriaObject.h"
 
 static NSString *sRequestURL = @"";
 static NSUserDefaults *userDefaults;
@@ -22,6 +23,8 @@ static NSMutableArray *arrTagsChecked_ = nil, *arrTagsUnchecked_ = nil;
 
 static NSMutableArray *arrThumbFilesSmall_ = nil, *arrThumbFilesMedium_ = nil, *arrDocFiles_ = nil;
 static BOOL blnVarLoaded = NO;
+static SORTBY documentSortBy = DateAdded_NewestFirst;
+static int documentOptionView = 1;
 
 /*
 static int iCabId = kCabIdAll;
@@ -101,6 +104,7 @@ static CabinetType cabType_ = CabinetTypeAll;
 
 #pragma mark -
 + (NSString*)ticket {
+    //return @"NMKlCO3JDljRZpagWS7f5W6HvnA";
     return [userDefaults objectForKey:@"Ticket"];
 }
 
@@ -574,8 +578,7 @@ static NSString *appVersion_ = @"1.2";
 }
 
 
-#pragma mark -
-#pragma mark Main NavigationController
+#pragma mark - Main NavigationController
 static UINavigationController *mainNavigationController_ = nil;
 + (UINavigationController*)mainNavigationController {
     return mainNavigationController_;
@@ -587,8 +590,7 @@ static UINavigationController *mainNavigationController_ = nil;
     }
 }
 
-#pragma mark -
-#pragma mark DocumentController
+#pragma mark - DocumentController
 static NSObject *docCon_ = nil;
 + (NSObject*)docCon {
     return docCon_;
@@ -612,5 +614,55 @@ static NSDictionary *dictAccountInfo_ = nil;
 }
 + (NSDictionary*)dictAccountInfo {
     return dictAccountInfo_;
+}
+
+
+static UIStoryboard *storyboard_;
++ (void)setStoryboard:(UIStoryboard*)storyboard {
+    storyboard_ = storyboard;
+}
+
++ (UIStoryboard *)storyboard {
+    return storyboard_;
+}
+
++ (SORTBY)getSortDocumentBy {
+    return documentSortBy;
+}
+
++ (void)setSortDocumentBy:(SORTBY)sortBy {
+    documentSortBy = sortBy;
+}
+
++ (int)getDocumentOptionView {
+    return documentOptionView;
+}
+
++ (void)setDocumentOptionView:(int)showView {
+    documentOptionView = showView;
+}
+
+static BOOL needToReloadAllDocuments_ = NO;
++ (BOOL)needToReloadAllDocuments {
+    return needToReloadAllDocuments_;
+}
++ (void)setNeedToReloadAllDocuments:(BOOL)val {
+    needToReloadAllDocuments_ = val;
+}
+
+static BOOL lockedOrientation_ = NO;
++ (BOOL)lockedOrientation {
+    return lockedOrientation_;
+}
++ (void)setLockedOrientation:(BOOL)val {
+    lockedOrientation_ = val;
+}
+
+static BOOL isShowingMenu_ = NO;
++ (BOOL)isShowingMenu {
+    return isShowingMenu_;
+}
++ (void)setIsShowingMenu:(BOOL)val {
+    isShowingMenu_ = val;
 }
 @end

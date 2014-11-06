@@ -8,7 +8,6 @@
 
 #import <UIKit/UIKit.h>
 
-@class LoginController;
 @interface SignupViewController : UITableViewController<UITextFieldDelegate>
 
 @property (weak, readonly) NSString *firstName;

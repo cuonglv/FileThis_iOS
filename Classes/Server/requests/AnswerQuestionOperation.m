@@ -10,7 +10,6 @@
 #import "AnswerQuestionOperation.h"
 #import "FTConnection.h"
 #import "FTSession.h"
-#import "TestFlight.h"
 
 // POST /ftapi/ftapi?op=questionanswer&id=481&flex=true&ticket=Lv4jJZpf2yt0XP5jMg1mTiFRREn HTTP/1.1
 // response: <result></result>
@@ -101,7 +100,7 @@ Proxy-Connection	keep-alive
     self = [super initWithRequest:req];
     if (self != nil) {
         [self setCompletionBlockWithSuccess:^(AFHTTPRequestOperation *operation, NSDictionary *responseObject) {
-            NSAssert1([responseObject count] == 0, @"non-empty response:%@", responseObject);
+            //NSAssert1([responseObject count] == 0, @"non-empty response:%@", responseObject);
             [[NSNotificationCenter defaultCenter] postNotificationName:FTAnsweredQuestion object:nil userInfo:nil];
         } failure:^(AFHTTPRequestOperation *operation, NSError *err) {
             [[FTSession sharedSession] handleError:err forOperation:operation withTitle:@"Cannot Save Verification"];

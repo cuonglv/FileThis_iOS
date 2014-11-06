@@ -7,8 +7,9 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "MyDetailViewController.h"
 
-@interface ConnectionViewController : UIViewController
+@interface ConnectionViewController : MyDetailViewController
 
 - (IBAction)cancel:(UIStoryboardSegue *)segue;
 - (IBAction)save:(UIStoryboardSegue *)segue;

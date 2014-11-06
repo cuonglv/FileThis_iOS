@@ -9,9 +9,11 @@
 #import "FTSession.h"
 #import <Crashlytics/Crashlytics.h>
 #import "ServerPickerViewController.h"
+#import "CommonLayout.h"
+#import "CacheManager.h"
 
 @interface ServerPickerViewController () <UIPickerViewDataSource,UIPickerViewDelegate, UIAlertViewDelegate>
-
+@property (nonatomic, strong) UILabel *titleLabel;
 @property (nonatomic, strong) UIPickerView *picker;
 @end
 
@@ -39,6 +41,8 @@
 - (void)viewWillAppear:(BOOL)animated {
     CLS_LOG(@"ServerPickerViewController viewWillAppear:");
     [super viewWillAppear:animated];
+    self.picker.center = CGPointMake(self.view.frame.size.width/2, self.view.frame.size.height/2);
+    [self.titleLabel moveToTopOfView:self.picker offset:10];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -52,11 +56,11 @@
     
     CGRect frame = self.view.frame;
     frame.size.height = 80;
-    UILabel *label = [[UILabel alloc] initWithFrame:frame];
-    label.text = [NSString stringWithFormat:@"Change server from %@ to ", [FTSession hostName]];
-    label.font = [UIFont boldSystemFontOfSize:14.0];
-    label.numberOfLines = 0;
-    [self.view addSubview:label];
+    self.titleLabel = [[UILabel alloc] initWithFrame:frame];
+    self.titleLabel.text = [NSString stringWithFormat:@"Change server from %@ to ", [FTSession hostName]];
+    self.titleLabel.font = [UIFont boldSystemFontOfSize:14.0];
+    self.titleLabel.numberOfLines = 0;
+    [self.view addSubview:self.titleLabel];
 
     frame.size.height = 200;
     frame.origin.y += 80;
@@ -93,6 +97,7 @@
 -(void)pickerView:(UIPickerView *)pickerView didSelectRow:(NSInteger)row inComponent:(NSInteger)component {
     NSString *hostName = [[[self class] configurations] objectAtIndex:row];
     [FTSession setHostName:hostName];
+    [[CacheManager getInstance] setServerUrl:[NSString stringWithFormat:@"https://%@/ftapi/ftapi?",hostName]];
     [self.navigationController popViewControllerAnimated:YES];
 }
 

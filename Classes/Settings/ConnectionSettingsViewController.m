@@ -45,6 +45,7 @@
     // self.navigationItem.rightBarButtonItem = self.editButtonItem;
     
     [self.navigationController setToolbarHidden:YES];
+    [self.navigationController setNavigationBarHidden:NO animated:NO];
 }
 
 - (void)viewWillAppear:(BOOL)animated

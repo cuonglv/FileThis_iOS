@@ -10,7 +10,6 @@
 #import "RootViewController.h"
 
 #import "ConnectionViewController.h"
-#import "LoginController.h"
 #import "SignupViewController.h"
 
 #import "CommonVar.h"
@@ -34,7 +33,7 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    CLS_LOG(@"%@ viewWillLoad", self);
+    CLS_LOG(@"%@ viewDidLoad:", [[self class] description]);
     
     //get app version TODO: use GCD
     NSDictionary *dictInfo = [NSDictionary dictionaryWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"Info" ofType:@"plist"]];
@@ -81,25 +80,25 @@
 }
 
 - (void)presentLogin {
-    UIViewController *vc = [[LoginController alloc] initWithNibName:@"LoginController" bundle:nil];
-    BOOL isPad = NO && UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad;
-    CGRect bounds;
-    if(isPad) {
-        vc.view.autoresizesSubviews = NO;
-        vc.view.autoresizingMask = UIViewAutoresizingNone;
-        vc.definesPresentationContext = YES;
-        vc.providesPresentationContextTransitionStyle = YES;
-        vc.modalPresentationStyle = UIModalPresentationFormSheet;
-        bounds = vc.view.bounds;
-    }
-    vc.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
-    [self presentViewController:vc animated:YES completion:nil];
-    if (isPad) {
-        NSLog(@"login view is %@, login's superview is %@", vc.view, vc.view.superview);
-        // ModalPresentationForm Sheet resizes nib. reset the super's bounds to match nib's bounds after presenting.
-        // http://stackoverflow.com/questions/2457947/how-to-resize-a-uipresentationformsheet/4271364#4271364
-        vc.view.superview.bounds = bounds;
-    }
+//    UIViewController *vc = [[LoginController alloc] initWithNibName:@"LoginController" bundle:nil];
+//    BOOL isPad = NO && UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad;
+//    CGRect bounds;
+//    if(isPad) {
+//        vc.view.autoresizesSubviews = NO;
+//        vc.view.autoresizingMask = UIViewAutoresizingNone;
+//        vc.definesPresentationContext = YES;
+//        vc.providesPresentationContextTransitionStyle = YES;
+//        vc.modalPresentationStyle = UIModalPresentationFormSheet;
+//        bounds = vc.view.bounds;
+//    }
+//    vc.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
+//    [self presentViewController:vc animated:YES completion:nil];
+//    if (isPad) {
+//        NSLog(@"login view is %@, login's superview is %@", vc.view, vc.view.superview);
+//        // ModalPresentationForm Sheet resizes nib. reset the super's bounds to match nib's bounds after presenting.
+//        // http://stackoverflow.com/questions/2457947/how-to-resize-a-uipresentationformsheet/4271364#4271364
+//        vc.view.superview.bounds = bounds;
+//    }
 }
 
 - (void)presentSignup {

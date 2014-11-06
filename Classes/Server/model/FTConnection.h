@@ -25,6 +25,7 @@
 @property (readonly) NSString *fetchFrequency;
 @property (readonly) NSURL *iconURL;
 @property NSString *password;
+@property (strong) NSString *info; //: A string to display to the user. Used to be more specific about what might be wrong.
 
 @property long documentCount; // The number of documents fetched the last time it ran successfully.
 @property BOOL fetchAll; // True if the next fetch will force fetch of *all* documents, not just the new ones.
@@ -34,6 +35,7 @@
 
 - (NSString *)label;
 - (NSString *)detailedText;
+- (NSString *)getInfoDescription;
 //- (UIImage *)icon;
 
 - (BOOL)hasQuestion;

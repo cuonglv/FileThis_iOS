@@ -7,13 +7,17 @@
 //
 
 #import <Crashlytics/Crashlytics.h>
+#import "CommonFunc.h"
 #import "MF_Base64Additions.h"
 #import "AnswerQuestionOperation.h"
+#import "UIView+ExtLayout.h"
 
 #import "QuestionsController.h"
 #import "FTQuestion.h"
 #import "FTSession.h"
 #import "Constants.h"   //Cuong
+#import "CommonLayout.h" //Cuong
+#import "FTMobileAppDelegate.h"
 
 enum {
     kQCLabelRow,
@@ -21,15 +25,17 @@ enum {
     kNumberRows
 };
 
-@interface QuestionsController ()
+@interface QuestionsController () <UIToolbarDelegate>
 
 //@property (weak, nonatomic) IBOutlet QuestionPanel *panelView;
 @property (weak, nonatomic) IBOutlet UIBarButtonItem *doneButton;
 @property (strong) NSString *doneButtonTitle;
 @property (weak, nonatomic) IBOutlet UILabel *descriptionView;
+@property (weak, nonatomic) IBOutlet UIView *infoBackgroundView;
+@property (weak, nonatomic) IBOutlet UILabel *labelInfo;
 @property (weak, nonatomic) IBOutlet UITextField *answerField;
-@property (weak, nonatomic) IBOutlet UITextField *answerFieldA;
-@property (weak, nonatomic) IBOutlet UITextField *answerFieldB;
+@property (weak, nonatomic) IBOutlet UITextField *answerFieldA; //user id
+@property (weak, nonatomic) IBOutlet UITextField *answerFieldB; //password
 @property (weak, nonatomic) IBOutlet UIPickerView *answerPicker;
 @property (weak, nonatomic) IBOutlet UIView *credentialsView;
 @property (weak, nonatomic) IBOutlet UIToolbar *toolbarView;
@@ -54,31 +60,25 @@ enum {
 @implementation QuestionsController
 
 
-+ (void) askQuestions:(NSArray *)questions
++ (void)askQuestions:(NSArray *)questions
    fromViewController:(UIViewController *)presenter
              fromRect:(CGRect)rect
         forConnection: (FTConnection *)connection
            withAction:(SEL)doneAction
      withCancelAction:(SEL)cancelAction;
 {
-//    QuestionPanel *panel = [[QuestionPanel alloc] initWithNibName:nil bundle:nil];
-//    panel.title = connection.name;
     QuestionsController *qc = [[QuestionsController alloc] initWithNibName:@"QuestionsController" bundle:nil];
     qc.okAction = doneAction;
     qc.cancelAction = cancelAction;
     qc.questionQueue = [questions mutableCopy];
     qc.connection = connection;
     qc.presenter = presenter;
-//    qc.toolbarHidden = NO;
-
-//    [qc pushViewController:panel animated:YES];
     
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
         [presenter presentViewController:qc animated:YES
                              completion: ^ {
                                  NSLog(@"view appeared...");
                              }];
-//        [qc pushViewController:panel animated:YES];
     } else {
         UIPopoverController *po = [[UIPopoverController alloc] initWithContentViewController:qc];
         qc.popover = po;
@@ -102,8 +102,23 @@ enum {
 }
 
 - (void)viewDidLoad {
+    CLS_LOG(@"%@ viewDidLoad:", [[self class] description]);
+    
     NSLog(@"qc's view=%@", self.view);
     self.doneButtonTitle = self.doneButton.title;
+    
+    //Cuong: set title font and color
+    self.toolbarView.delegate = self;
+    self.toolbarView.barTintColor = kTextOrangeColor;
+    UIFont * font = [CommonLayout getFont:FontSizeSmall isBold:NO];
+    NSDictionary * attributes = @{NSFontAttributeName: font};
+    for (id barItem in self.toolbarView.items) {
+        if ([barItem isKindOfClass:[UIBarButtonItem class]]) {
+            [barItem setTitleTextAttributes:attributes forState:UIControlStateNormal];
+        }
+    }
+    [CommonLayout setAppFontForSubviewsOfView:self.view];
+    self.infoBackgroundView.layer.cornerRadius = 2;
     
     //    self.tableView = [[UITableView alloc] initWithFrame:self.view.frame style:UITableViewStyleGrouped];
     //    [self.view addSubview:self.tableView];
@@ -129,15 +144,16 @@ enum {
     
     self.answeredQuestions = [NSMutableArray arrayWithCapacity:4];
     
-    if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0")) { //Cuong
+//    if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0")) { //Cuong
         if(UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
-            if (self.toolbarView.frame.origin.y < 20.0) {
-                self.toolbarView.center = CGPointMake(self.toolbarView.center.x, self.toolbarView.center.y + 20.0);
-                self.descriptionView.frame = CGRectMake(self.descriptionView.frame.origin.x, self.descriptionView.frame.origin.y + 20.0, self.descriptionView.frame.size.width, self.descriptionView.frame.size.height - 20.0);
-                [self.view layoutSubviews];
-            }
+            [self.toolbarView setTop:20];
+            [self.descriptionView setTop:[self.toolbarView bottom] + 20];
+            [self.view setNeedsLayout];
         }
-    }
+//    }
+    self.labelInfo.frame = [self.descriptionView rectAtBottom:10 height:300];
+    self.labelInfo.hidden = YES;
+    
     [super viewDidLoad];
 }
 
@@ -146,9 +162,10 @@ enum {
     [super viewWillAppear:animated];
     (void) [self setNextQuestion:animated];
 
-#ifdef DEBUG
-    NSLog(@"%@ viewWillAppear - description view = %@", self, self.descriptionView);
-#endif
+    /*if (!self.currentQuestion.isMultipleChoice) {
+        [[self.toolbarView.items lastObject] setEnabled:NO];
+    }*/
+    [self refreshButton];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -194,8 +211,13 @@ enum {
     if (stillGoing) {
         self.currentQuestion = self.questionQueue[self.nextQuestionIndex];
         [UIView animateWithDuration:1.0 animations:^{
-            if (numRemaining == 1)
-                self.doneButton.title = self.doneButtonTitle;
+            if (numRemaining == 1) {
+                if (self.currentQuestion.isActionRequired) {
+                    self.doneButton.title = @"Try Again";
+                } else {
+                    self.doneButton.title = self.doneButtonTitle;
+                }
+            }
             [self takeValuesFromQuestion:self.currentQuestion];
         }];
         
@@ -236,24 +258,59 @@ enum {
         NSString *rawAnswer = [[a stringByAppendingString:@":"] stringByAppendingString:b];
         answer = [rawAnswer base64String];
     } else {
-        answer = self.answerField.text;
+        answer = stringNotNil(self.answerField.text);
     }
     self.currentQuestion.answer = answer;
     
     return answer;
 }
 
--(void)takeValuesFromQuestion:(FTQuestion *)question {
+- (void)takeValuesFromQuestion:(FTQuestion *)question {
     self.currentQuestion = question;
     
     self.answerField.text = nil;
     self.answerFieldA.text = nil;
     self.answerFieldB.text = nil;
     
+//#ifdef DEBUG_SET_USER_ACTION_REQUIRED_FOR_1ST_CREDENTIALS_QUESTION
+//    NSString *questionString = @"One-Time Identification Code Needed\nFirst Tech Federal Credit Union needs a one-time Identification Code to confirm that you own the accounts before FileThis can access them. Please re-run this connection and follow the instructions.";
+//#else
     NSString *questionString = question.label;
-    if (questionString != NULL) {
-        self.descriptionView.text = questionString;
-        [self.descriptionView sizeToFit];
+//#endif
+    
+    if ([questionString length] > 0) {
+        NSMutableParagraphStyle *style  = [[NSMutableParagraphStyle alloc] init];
+        style.paragraphSpacing = 8.f;
+        style.lineSpacing = 2.f;
+        style.alignment = NSTextAlignmentCenter;
+        NSDictionary *attributtes = @{NSParagraphStyleAttributeName : style,};
+        self.descriptionView.attributedText = [[NSAttributedString alloc] initWithString:questionString  attributes:attributtes];
+        [self.descriptionView autoHeight];
+        
+        float y = [self.descriptionView bottom] + 20;
+        [self.answerField setTop:y];
+        [self.answerPicker setTop:y];
+        [self.credentialsView setTop:y];
+    }
+    
+    self.labelInfo.hidden = YES;
+    self.infoBackgroundView.hidden = YES;
+    
+    if ([question isActionRequired]) {
+#ifdef DEBUG_SET_USER_ACTION_REQUIRED_FOR_1ST_CREDENTIALS_QUESTION
+        NSString *connectionInfo = @"Before FileThis can fetch your documents you must first login directly to your Nationstar Mortgage account and accept the new Terms of Use.";
+#else
+        NSString *connectionInfo = [self.connection getInfoDescription];
+#endif
+        if (connectionInfo.length > 0) {
+            self.labelInfo.frame = CGRectMake([self.descriptionView left] + 10, [self.descriptionView bottom] + 30, self.view.frame.size.width - 2 * [self.descriptionView left] - 20, 300);
+            self.labelInfo.text = connectionInfo;
+            [self.labelInfo autoHeight];
+            self.labelInfo.hidden = NO;
+            
+            self.infoBackgroundView.frame = CGRectMake([self.descriptionView left], [self.descriptionView bottom] + 20, self.view.frame.size.width - 2 * [self.descriptionView left], self.labelInfo.frame.size.height + 20);
+            self.infoBackgroundView.hidden = NO;
+        }
     }
     
     BOOL isReadOnly = [question isReadOnly];
@@ -299,8 +356,54 @@ enum {
     NSLog(@"TODO: implement textfielddone:%@", sender);
 }
 
+#pragma mark - Check input data
+- (BOOL)checkDataToAnwser {
+    if (self.currentQuestion.isMultipleChoice)
+        return YES;
+    
+    if (self.currentQuestion.isActionRequired)
+        return YES;
+    
+    if (self.currentQuestion.isNoticeMessage)
+        return YES;
+    
+    if (self.currentQuestion.isCredentials) {
+        /*
+         where <encoded_credentials> is the base-64 encoding of the string:
+         <username>:<password>
+         */
+        NSString *a = self.answerFieldA.text != nil ? self.answerFieldA.text : @"";
+        NSString *b = self.answerFieldB.text != nil ? self.answerFieldB.text : @"";
+        if ( (a.length > 0) && (b.length > 0) )
+            return YES;
+        return NO;
+    }
+    
+    if (self.answerField.text.length > 0)
+        return YES;
+    
+    return NO;
+}
 
-#pragma mark UIPickerViewDataSource
+- (void)refreshButton {
+    BOOL ok = [self checkDataToAnwser];
+    [[self.toolbarView.items lastObject] setEnabled:ok];
+}
+
+- (void)refreshButtonWithText:(NSString*)text {
+    NSString *trim = [text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    BOOL enabled = (trim.length > 0);
+    [[self.toolbarView.items lastObject] setEnabled:enabled];
+}
+
+- (void)refreshButtonWithText:(NSString*)text1 andText:(NSString*)text2 {
+    NSString *trim1 = [text1 stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    NSString *trim2 = [text2 stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    BOOL enabled = ( (trim1.length > 0) && (trim2.length > 0) );
+    [[self.toolbarView.items lastObject] setEnabled:enabled];
+}
+
+#pragma mark - UIPickerViewDataSource
 // returns the number of 'columns' to display.
 - (NSInteger)numberOfComponentsInPickerView:(UIPickerView *)pickerView { return 1; }
 
@@ -309,7 +412,7 @@ enum {
     return [self.currentQuestion pickerRowCount];
 }
 
-#pragma mark UIPickerViewDelegate
+#pragma mark - UIPickerViewDelegate
 
 - (NSString *)pickerView:(UIPickerView *)pickerView titleForRow:(NSInteger)row forComponent:(NSInteger)component {
     return [self.currentQuestion pickerTitleForRow:row];
@@ -320,7 +423,23 @@ enum {
     self.currentQuestion.answer = self.pickedValue;
 }
 
-#pragma mark UITextFieldDelegate methods
+#pragma mark - UITextFieldDelegate methods
+
+- (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string {
+    NSString *newText = [textField.text stringByReplacingCharactersInRange:range withString:string];
+    if (self.currentQuestion.isCredentials) {
+        NSString *text2 = nil;
+        if (textField == self.answerFieldA) {
+            text2 = self.answerFieldB.text;
+        } else if (textField == self.answerFieldB) {
+            text2 = self.answerFieldA.text;
+        }
+        [self refreshButtonWithText:newText andText:text2];
+    } else {
+        [self refreshButtonWithText:newText];
+    }
+    return YES;
+}
 
 // called when 'return' key pressed. return NO to ignore.
 - (BOOL)textFieldShouldReturn:(UITextField *)textField
@@ -342,14 +461,23 @@ enum {
     return !done;
 }
 
-#pragma mark Actions
+#pragma mark - Actions
 
 - (IBAction)cancel:(id)sender {
     [self dismissQuestionPanel];
 }
 
 - (IBAction)done:(id)sender {
-    if (!self.currentQuestion.isReadOnly) {
+    if (![self checkDataToAnwser])
+        return;
+    
+    if (self.currentQuestion.isActionRequired) {
+        [self.connection refetch];
+        [self dismissQuestionPanel];
+        return;
+    }
+    
+    if (!self.currentQuestion.isReadOnly || self.currentQuestion.isNoticeMessage) {
         self.currentQuestion.answer = self.answerText;
         [self.answeredQuestions addObject:self.currentQuestion ];
         NSInteger nextQuestionId = [self nextQuestionId];
@@ -364,11 +492,14 @@ enum {
         }
     }
     
-    if (![self setNextQuestion:YES])
+    if (![self setNextQuestion:YES]) {
         [self dismissQuestionPanel];
+    } else {
+        [self refreshButton];
+    }
 }
 
-#pragma mark UIPopoverControllerDelegate methods
+#pragma mark - UIPopoverControllerDelegate methods
 
 - (void)popoverControllerDidDismissPopover:(UIPopoverController *)popoverController
 {
@@ -378,7 +509,7 @@ enum {
 #define USE_TABLE_VIEW  0
 
 #if USE_TABLE_VIEW
-#pragma mark UITableViewDataSource methods
+#pragma mark - UITableViewDataSource methods
 
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     return kNumberRows;
@@ -423,7 +554,11 @@ enum {
     return self.currentQuestion.header;
 }
 
-#pragma mark UITableViewDelegate methods
 #endif
 
+//Cuong
+#pragma mark - Toolbar Adjustment
+- (UIBarPosition)positionForBar:(id <UIBarPositioning>)bar {
+    return UIBarPositionTopAttached;
+}
 @end

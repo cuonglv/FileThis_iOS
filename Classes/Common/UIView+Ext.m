@@ -55,6 +55,10 @@
     self.frame = CGRectMake(right - self.frame.size.width, bottom - self.frame.size.height, self.frame.size.width, self.frame.size.height);
 }
 
+- (void)setRightWithoutChangingLeft:(float)right {
+    self.frame = CGRectMake(self.frame.origin.x, self.frame.origin.y, right - self.frame.origin.x, self.frame.size.height);
+}
+
 - (void)setTop:(float)top {
     self.frame = CGRectMake(self.frame.origin.x, top, self.frame.size.width, self.frame.size.height);
 }
@@ -70,8 +74,24 @@
     self.frame = CGRectMake(self.frame.origin.x, bottom - self.frame.size.height, self.frame.size.width, self.frame.size.height);
 }
 
+- (void)setBottomWithoutChangingTop:(float)bottom {
+    self.frame = CGRectMake(self.frame.origin.x, self.frame.origin.y, self.frame.size.width, bottom - self.frame.origin.y);
+}
+
 - (void)setOrigin:(CGPoint)origin {
     self.frame = CGRectMake(origin.x, origin.y, self.frame.size.width, self.frame.size.height);
+}
+
+- (void)setRightWithoutChangingLeft:(float)right bottomWithoutChangingTop:(float)bottom {
+    float newWidth = right - self.frame.origin.x;
+    if (newWidth < 0)
+        newWidth = 0;
+    
+    float newHeight = bottom - self.frame.origin.y;
+    if (newHeight < 0)
+        newHeight = 0;
+    
+    self.frame = CGRectMake(self.frame.origin.x, self.frame.origin.y, newWidth, newHeight);
 }
 
 #pragma mark -
@@ -94,6 +114,10 @@
 
 - (void)moveToHorizontalCenterOfSuperView {
     self.center = CGPointMake(self.superview.frame.size.width/2,self.center.y);
+}
+
+- (void)moveToCenterOfSuperView {
+    self.center = CGPointMake(self.superview.frame.size.width/2,self.superview.frame.size.height/2);
 }
 
 #pragma mark -
@@ -132,6 +156,10 @@
 
 - (CGRect)rectAtTop:(float)offset height:(float)height {
     return CGRectMake(self.frame.origin.x, self.frame.origin.y - offset - height, self.frame.size.width, height);
+}
+
+- (CGRect)rectAtTop:(float)offset width:(float)width height:(float)height {
+    return CGRectMake(self.center.x - width/2, self.frame.origin.y - offset - height, width, height);
 }
 
 - (CGRect)rectAtBottom:(float)offset height:(float)height {
@@ -184,6 +212,8 @@
     self.frame = CGRectMake(left, self.frame.origin.y, newWidth, newHeight);
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 - (float)autoWidth {
     float w;
     if ([self isKindOfClass:[UIButton class]]) {
@@ -195,6 +225,7 @@
     [self setWidth:w];
     return w;
 }
+#pragma GCC diagnostic pop
 
 - (float)autoWidthAlignAtRight {
     float w = [self sizeThatFits:CGSizeZero].width;
@@ -203,7 +234,7 @@
 }
 
 - (void)autoHeight {
-    [self setHeight:[self sizeThatFits:CGSizeZero].height];
+    [self setHeight:[self sizeThatFits:CGSizeMake(self.frame.size.width, 2000)].height];
 }
 
 - (BOOL)fitWidth:(float)maxWidth {
@@ -242,5 +273,22 @@
 }
 
 - (void)relayout {
+}
+
+- (BOOL)containsTouch:(UITouch*)touch {
+    CGPoint p = [touch locationInView:self.superview];
+    if (p.x < self.frame.origin.x)
+        return NO;
+    
+    if (p.x > self.frame.origin.x + self.frame.size.width)
+        return NO;
+    
+    if (p.y < self.frame.origin.y)
+        return NO;
+    
+    if (p.y > self.frame.origin.y + self.frame.size.height)
+        return NO;
+    
+    return YES;
 }
 @end

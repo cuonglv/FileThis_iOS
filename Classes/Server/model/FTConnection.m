@@ -71,7 +71,6 @@ static NSString *WORKFLOW_STATE_ERROR = @"error";
  username = drewmwilson;
  }*/
 @property NSDictionary *originalValues;
-@property (strong) NSString *info; //: A string to display to the user. Used to be more specific about what might be wrong.
 @property (strong,nonatomic) NSString *stateString;
 @property FTConnectionState state;
 @property FTInstitution *institution;
@@ -302,10 +301,14 @@ static NSString *WORKFLOW_STATE_ERROR = @"error";
                 [dateFormatter setDateStyle:dateFormat];
             }
             NSString *dateString = [dateFormatter stringFromDate:self.checked];
-            if (self.documentCount != 0)
+            if (self.documentCount != 0) {
                 return [NSString stringWithFormat:@"Fetched %ld documents on %@", self.documentCount, dateString];
-            else
-                return [NSString stringWithFormat:@"Checked for documents on %@", dateString];
+            } else {
+                if ([self.checked timeIntervalSince1970] > 0)
+                    return [NSString stringWithFormat:@"Checked for documents on %@", dateString];
+                else
+                    return @"Last fetch did not complete. We will try again later.";
+            }
             break;
         }
         case connecting:
@@ -336,6 +339,10 @@ static NSString *WORKFLOW_STATE_ERROR = @"error";
     return [NSString stringWithFormat:@"TODO: implement support for %@", [self stringFromState:self.state]];
 }
 
+- (NSString *)getInfoDescription {
+    return self.info;
+}
+
 - (NSURL *)iconURL
 {
     if (_iconURL == nil)
@@ -347,7 +354,7 @@ static NSString *WORKFLOW_STATE_ERROR = @"error";
     static NSDateFormatter *_dayFormatter = nil;
     if (_dayFormatter == nil) {
         _dayFormatter = [[NSDateFormatter alloc] init];
-        // NSDateFormatterLongStyle NSDateFormatterFullStyle NSDateFormatterMediumStyle
+        // NSDateFormatterLongStyle NSDateFormatterFullStyle NSDateFormatterMediumStyle 
         [_dayFormatter setDateStyle:NSDateFormatterLongStyle];
         [_dayFormatter setTimeStyle:NSDateFormatterNoStyle];
     }
@@ -411,7 +418,7 @@ static NSString *WORKFLOW_STATE_ERROR = @"error";
     if (self.institution)
         return;
     self.institution = [[FTSession sharedSession] institutionWithId:self.institutionId];
-    NSAssert(self.institution != nil, @"nil institutions for %ld", self.institutionId);
+    //NSAssert(self.institution != nil, @"nil institutions for %ld, connectionId %ld", self.institutionId, self.connectionId);
     if (self.institution) {
         self.disabled = ![self.institution enabled];
         if (!self.disabled)
@@ -443,6 +450,11 @@ static NSString *WORKFLOW_STATE_ERROR = @"error";
         [[NSNotificationCenter defaultCenter] postNotificationName:FTConnectionDeleted object:self userInfo:nil];
     } failure:^(NSURLRequest *request, NSHTTPURLResponse *response, NSError *error, id JSON) {
         NSLog(@"%@ request failed because %@", request, error);
+        if (error.code == DOMAIN_ERROR_CODE) {
+            [[FTSession sharedSession] handleError:error forResponse:response withTitle:@""];
+        } else {
+            [CommonLayout showWarningAlert:error.localizedDescription errorMessage:nil delegate:nil];
+        }
     }];
     [[FTSession sharedSession] enqueueHTTPRequestOperation:op];
     return NO;
@@ -1083,7 +1095,7 @@ BOOL booleanValue(id value)
         }];
     }
     
-#ifdef DEBUG
+#ifdef ENABLE_NSLOG_REQUEST
     NSLog(@"Processed %d raw connections, %d updated, %d questions, %d transitioning", [rawConnections count], numUpdated, numWithQuestions, numTransitioning);
 #endif
 
@@ -1094,16 +1106,20 @@ BOOL booleanValue(id value)
     if (numUpdated != 0 || [FTSession sharedSession].connections == nil) {
         [FTSession sharedSession].connections = connections;
     }
+    
+    // post getConnections event
+    [[NSNotificationCenter defaultCenter] postNotificationName:FTGotConnections object:connections userInfo:nil];
+    
     // start downloading questions after we have all the connections
     if (numWithQuestions != 0) {
-#ifdef DEBUG
+#ifdef ENABLE_NSLOG_REQUEST
         NSLog(@"requesting questions because %d questions", numWithQuestions);
 #endif
         [[FTSession sharedSession] requestQuestions];
     }
 
     if (numTransitioning != 0 && !self.isCancelled) {
-#ifdef DEBUG
+#ifdef ENABLE_NSLOG_REQUEST
         NSLog(@"reissuing connlist because %d still transitioning", numTransitioning);
 #endif
         // We want UI to be responsive so delay shouldn't be too big...

@@ -7,6 +7,7 @@
 //
 
 #import "SettingsController.h"
+#import <Crashlytics/Crashlytics.h>
 #import "Layout.h"
 #import "Constants.h"
 #import "CommonVar.h"
@@ -31,6 +32,8 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    CLS_LOG(@"%@ viewDidLoad:", [[self class] description]);
+    
     // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
     // self.navigationItem.rightBarButtonItem = self.editButtonItem;
     [self.navigationController setNavigationBarHidden:NO];
@@ -139,14 +142,6 @@
                 break;
         }
     }
-    
-    // Configure the cell...
-    
-     
-    
-    //KeyValueCell *kvCell = (KeyValueCell*)cell;
-    //[kvCell setCellValue:<#(NSString *)value#>]
-    
     return cell;
 }
 

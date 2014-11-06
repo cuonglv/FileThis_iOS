@@ -55,7 +55,6 @@ typedef enum {
 @property (strong, nonatomic) NSString *userEmail;
 @property BOOL isEvernote;
 
-
 @end
 
 @implementation FTDestinationConnection
@@ -109,7 +108,7 @@ typedef enum {
 
 - (id)initWithDictionary:(NSDictionary *)dictionary
 {
-#ifdef DEBUG
+#ifdef ENABLE_NSLOG_REQUEST
     NSLog(@"DestinationConnection dictionary=%@", dictionary);
 #endif
     if ((self = [super init])) {
@@ -124,6 +123,7 @@ typedef enum {
 
         self.userName = dictionary[@"userName"];
         self.userEmail = dictionary[@"userEmail"];
+        self.provider = dictionary[@"provider"];
         // TODO: add support for Google Drive's userPicture,
         // which is a URL to an image.
 //        self.userPictureUrl = dictionary[@"userPicture"];
@@ -140,7 +140,7 @@ typedef enum {
             }
 #endif
         }
-#ifdef DEBUG
+#ifdef ENABLE_NSLOG_REQUEST
         NSLog(@"Destination Connection #%d %@ has attributes: %@", self.destinationConnectionId, self.name, dictionary);
 #endif
     }

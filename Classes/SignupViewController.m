@@ -10,7 +10,6 @@
 #import "UIKitExtensions.h"
 #import "FTSession.h"
 #import "SignupViewController.h"
-#import "LoginController.h"
 #import "RootViewController.h"
 #import "FormLayoutView.h"
 #import "Constants.h"

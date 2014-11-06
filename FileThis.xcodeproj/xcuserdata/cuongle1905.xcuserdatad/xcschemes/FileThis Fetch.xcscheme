@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "3A1B783A171C5A51002ADE4F"
-               BuildableName = "FileThis Fetch.app"
+               BuildableName = "FileThis.app"
                BlueprintName = "FileThis Fetch"
                ReferencedContainer = "container:FileThis.xcodeproj">
             </BuildableReference>
@@ -33,7 +33,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "3A1B783A171C5A51002ADE4F"
-            BuildableName = "FileThis Fetch.app"
+            BuildableName = "FileThis.app"
             BlueprintName = "FileThis Fetch"
             ReferencedContainer = "container:FileThis.xcodeproj">
          </BuildableReference>
@@ -52,7 +52,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "3A1B783A171C5A51002ADE4F"
-            BuildableName = "FileThis Fetch.app"
+            BuildableName = "FileThis.app"
             BlueprintName = "FileThis Fetch"
             ReferencedContainer = "container:FileThis.xcodeproj">
          </BuildableReference>
@@ -64,13 +64,13 @@
       shouldUseLaunchSchemeArgsEnv = "YES"
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "NO"
-      buildConfiguration = "Release"
+      buildConfiguration = "Debug"
       debugDocumentVersioning = "YES">
       <BuildableProductRunnable>
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "3A1B783A171C5A51002ADE4F"
-            BuildableName = "FileThis Fetch.app"
+            BuildableName = "FileThis.app"
             BlueprintName = "FileThis Fetch"
             ReferencedContainer = "container:FileThis.xcodeproj">
          </BuildableReference>
@@ -80,7 +80,7 @@
       buildConfiguration = "Debug">
    </AnalyzeAction>
    <ArchiveAction
-      buildConfiguration = "Release"
+      buildConfiguration = "Debug"
       revealArchiveInOrganizer = "YES">
    </ArchiveAction>
 </Scheme>

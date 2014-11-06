@@ -48,6 +48,8 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    CLS_LOG(@"%@ viewDidLoad:", [[self class] description]);
+    
     [self updateMessage];
 }
 

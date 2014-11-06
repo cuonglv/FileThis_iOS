@@ -19,6 +19,9 @@
 #import "FTDestinationConnection.h"
 #import "FTInstitution.h"
 
+#define DOMAIN_ERROR_CODE                   -1011
+#define SERVICE_UNAVAILABLE_STATUS_CODE     503
+
 extern NSString *FTLoginNotification;
 extern NSString *FTLoadinFailedNotification;
 extern NSString *FTLoggedInNotification;
@@ -44,6 +47,7 @@ extern NSString *FTGetProductIdentifiers;
 
 // app-internal notifications
 extern NSString *FTGotQuestions;
+extern NSString *FTGotConnections;
 extern NSString *FTAnsweredQuestion;
 extern NSString *FTConnectionDeleted;
 extern NSString *FTInstitutionalLogoLoaded;
@@ -65,6 +69,12 @@ extern NSString *FTCreateConnectionFailed;
 @property (readonly, nonatomic) NSArray *destinations;
 @property (readonly) FTAccountSettings *settings;
 
+
+//Cuong: debug crash
+#ifdef DEBUG_TEST_NULL_CURRENT_DESTINATION_AFTER_REACTIVATING_APP
+@property (assign) BOOL app_is_reactivating;
+#endif
+
 @property (getter=isValidated) BOOL validated;
 @property BOOL loginDisabled;
 
@@ -81,9 +91,11 @@ typedef enum {
 
 - (BOOL)validateLoginResponse:(id)json;
 - (void)logout;
+- (void)loadDestinations;
 - (void)startup;
 
 -(void)requestConnectionsList;
+-(void)cancelRequestConnectionsList;
 -(void)requestQuestions;
 
 - (FTConnection *)findConnectionById:(NSInteger)connectionId;
@@ -110,6 +122,7 @@ typedef enum {
 - (void)getProductIdentifiers;
 
 - (void)getAuthenticationURLForDestination:(NSInteger) destinationId withSuccess:(void (^)(id JSON))success;
+- (void)connectToDestination:(NSInteger)destinationId username:(NSString*)username password:(NSString*)password withSuccess:(void (^)(id JSON))success; //Cuong
 
 - (void)verifyDestinationAuthorization:(NSURL *)url
                            withSuccess:(void (^)(NSInteger statusCode))success
@@ -118,6 +131,11 @@ typedef enum {
 - (void)login:(NSString *)username withPassword:(NSString *)password
     onSuccess:(void (^)(id JSON))success
     onFailure:(void (^)(NSURLRequest *request, NSHTTPURLResponse *response, NSError *error))failure;
+
+- (void)renewPassword:(NSString *)username
+         withPassword:(NSString *)password
+            onSuccess:(void (^)(id JSON))success
+            onFailure:(void (^)(NSURLRequest *request, NSHTTPURLResponse *response, NSError *error))failure;
 
 - (void)purchase:(SKPaymentTransaction *)transaction
      withSuccess:(void (^)(NSString *result))success
@@ -132,5 +150,6 @@ typedef enum {
 - (void)handleError:(NSError *)error forOperation:(AFHTTPRequestOperation *)operation withTitle:(NSString *)title;
 - (void)handleError:(NSError *)error forResponse:(NSHTTPURLResponse *)response withTitle:(NSString *)title;
 
-
+- (BOOL)isUsingFTDestination;
++ (void)setTest;
 @end

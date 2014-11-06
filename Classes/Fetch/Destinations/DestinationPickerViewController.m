@@ -34,7 +34,7 @@
 
 - (void)viewWillAppear:(BOOL)animated
 {
-    CLS_LOG(@"DestinationPickerViewController viewWillAppear:");
+    CLS_LOG(@"DestinationPickerViewController viewWillAppear: - current destination id: %i, name: %@", self.destination.destinationId, self.destination.name);
     [self.navigationController setNavigationBarHidden:NO animated:YES];
     self.navigationItem.hidesBackButton = self.hidesBackButton;
 
@@ -151,20 +151,22 @@
 //}
 //
 - (void)setCheckedRow:(NSIndexPath *)checkedRow {
-    NSIndexPath *oldIndexPath = _checkedRow;
+    //NSIndexPath *oldIndexPath = _checkedRow;
     _checkedRow = checkedRow;
-    if (oldIndexPath != nil)
-        [self.tableView reloadRowsAtIndexPaths:@[oldIndexPath] withRowAnimation:UITableViewRowAnimationFade];
+    //if (oldIndexPath != nil)
+        //[self.tableView reloadRowsAtIndexPaths:@[oldIndexPath] withRowAnimation:UITableViewRowAnimationFade];
     if (checkedRow != nil) {
         self.destination = [self.destinations objectAtIndex:checkedRow.row];
         self.nextButton.enabled = YES;
         self.nextButton.style = UIBarButtonItemStyleDone;
-        [self.tableView reloadRowsAtIndexPaths:@[_checkedRow] withRowAnimation:UITableViewRowAnimationFade];
+        //[self.tableView reloadRowsAtIndexPaths:@[_checkedRow] withRowAnimation:UITableViewRowAnimationFade];
     } else {
         self.destination = nil;
         self.nextButton.enabled = NO;
         self.nextButton.style = UIBarButtonItemStylePlain;
     }
+    
+    [self.tableView reloadData];
 }
 
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender

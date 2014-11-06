@@ -9,13 +9,13 @@
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "Classes/AddConnectionViewController.m"
-            timestampString = "406414191.034313"
+            filePath = "Classes/Server/model/FTQuestion.m"
+            timestampString = "428520945.105237"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "190"
-            endingLineNumber = "190"
-            landmarkName = "-handleConnect:"
+            startingLineNumber = "278"
+            endingLineNumber = "278"
+            landmarkName = "-isActionRequired"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
@@ -26,11 +26,13 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Classes/ConnectionViewController.m"
-            timestampString = "406718173.817643"
+            timestampString = "428508279.068615"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1017"
-            endingLineNumber = "1017">
+            startingLineNumber = "856"
+            endingLineNumber = "856"
+            landmarkName = "-askQuestionsForConnectionCell:"
+            landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -39,29 +41,29 @@
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "Classes/ConnectionCell.m"
-            timestampString = "406682700.442037"
+            filePath = "Classes/Server/FTSession.m"
+            timestampString = "428920930.022122"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "173"
-            endingLineNumber = "173"
-            landmarkName = "-setConnection:withEditing:"
+            startingLineNumber = "768"
+            endingLineNumber = "768"
+            landmarkName = "-processQuestions:"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "Classes/Login/RootViewController.m"
-            timestampString = "406717461.030299"
+            filePath = "Classes/Server/model/FTConnection.m"
+            timestampString = "428519424.209519"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "37"
-            endingLineNumber = "37"
-            landmarkName = "-viewDidLoad"
+            startingLineNumber = "1118"
+            endingLineNumber = "1118"
+            landmarkName = "-main"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>

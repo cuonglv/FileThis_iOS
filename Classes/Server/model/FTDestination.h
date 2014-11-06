@@ -17,6 +17,8 @@
 @property (readonly) NSString *logoName;
 @property (readonly) NSURL *logoUrl;
 @property (readonly) NSInteger destinationId;
+@property (readonly) NSString *provider;
+@property (nonatomic, strong) NSString *type;
 
 + (FTDestination *)destinationWithId:(NSInteger)destinationId;
 - (void)configureForTextLabel:(UILabel *)textLabel withImageView:imageView;

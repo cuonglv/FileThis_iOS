@@ -6,6 +6,7 @@
 //  Copyright (c) 2012 filethis.com. All rights reserved.
 //
 
+#import <Crashlytics/Crashlytics.h>
 #import "UIKitExtensions.h"
 
 #import "FTInstitution.h"
@@ -34,7 +35,8 @@ static NSString *FTCreateConnection = @"connecttoinstitution";
 
 + (UIImage *)placeholderImage
 {
-    return [UIImage imageNamed:@"glyphicons_263_bank"];
+    //return [UIImage imageNamed:@"glyphicons_263_bank"];
+    return [UIImage imageNamed:@"glyphicons_grey_bank"];
 }
 
 + (UIImage *)disabledBadge
@@ -65,7 +67,7 @@ static NSString *FTCreateConnection = @"connecttoinstitution";
         if ([state isEqualToString:@"live"])
             self.enabled = YES;
         else { // if ([state isEqualToString:INSTITUTION_STATE_DISABLED]) {
-#ifdef DEBUG
+#ifdef ENABLE_NSLOG_REQUEST
             NSLog(@"Institution %@’s state = %@", self.name, state);
 #endif
             self.enabled = NO;
@@ -112,7 +114,7 @@ static NSString *FTCreateConnection = @"connecttoinstitution";
             NSNotification *notification = [NSNotification notificationWithName:FTPremiumFeatureException object:request.json];
             [[NSNotificationCenter defaultCenter] postNotification:notification];
         } else {
-            NSLog(@"Cannot create new connection because %@", request.json);
+            CLS_LOG(@"Cannot create new connection because %@", request.json);
             [[NSNotificationCenter defaultCenter] postNotificationName:FTCreateConnectionFailed object:nil userInfo:request.json];
             
 //            NSString *message = request.errorMessage;
@@ -120,7 +122,7 @@ static NSString *FTCreateConnection = @"connecttoinstitution";
 //            [[[UIAlertView alloc] initWithTitle:title message:message delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil] show];
         }
     } else {
-        NSLog(@"created new connection. %@", request);
+        CLS_LOG(@"Created new connection. %@", request);
         [[FTSession sharedSession] requestConnectionsList];
     }
 }

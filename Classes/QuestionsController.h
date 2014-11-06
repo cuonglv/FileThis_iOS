@@ -13,7 +13,7 @@
 
 @property (strong,nonatomic, readonly) NSArray *questions;
 
-+ (void) askQuestions:(NSArray *)questions
++ (void)askQuestions:(NSArray *)questions
     fromViewController:(UIViewController *) vc
              fromRect:(CGRect)rect
         forConnection: (FTConnection *) connection

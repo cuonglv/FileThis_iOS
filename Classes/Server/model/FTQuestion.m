@@ -7,6 +7,7 @@
 //
 
 #import "FTQuestion.h"
+#import "CommonFunc.h"
 
 @interface FTQuestion ()
 
@@ -14,9 +15,6 @@
 @property (nonatomic,strong) NSString *header;
 @property (nonatomic,strong) NSArray *choices;
 @property (readonly) NSString *state;
-@property (readonly) NSString *type;
-@property (nonatomic, strong) NSString *label;
-@property (nonatomic, strong) NSString *key;
 
 @end
 
@@ -183,43 +181,61 @@
 @implementation FTQuestion
 
 - (id)initWithDictionary:(NSDictionary *)dictionary {
-#ifdef DEBUG
+#ifdef ENABLE_NSLOG_REQUEST
     NSLog(@"init question with %@", dictionary);
 #endif
     if (self = [super init]) {
-        NSAssert1(dictionary[@"data"] == nil, @"questions dictionary should not contain data key", dictionary);
-        _type = dictionary[@"type"];
-        _state = dictionary[@"state"];
-        _title = dictionary[@"title"];
-        _header = dictionary[@"header"];
-        _uniqueId = [dictionary[@"id"] integerValue];
-        _connectionId = [dictionary[@"connectionId"] integerValue];
-
-        NSDictionary *defaultValues = [self defaultValuesForQuestionType:self.type];
-        self.key = dictionary[@"key"];
-        if (self.key == nil)
-            self.key = defaultValues[@"key"];
-        if (self.key.length == 0)
-            self.key = nil;
-
-        self.label = dictionary[@"label"];
-        if (self.label == nil)
-            self.label = defaultValues[@"prompt"];
-        if (self.label.length == 0)
-            self.label = nil;
-        // This is really just useful for Chase account verification where
-        // we get sent back a title, header, and label. For now we just munge
-        // them all together.
-        if (self.header != nil)
-            self.label = [NSString stringWithFormat:@"%@\n%@\n%@",
-                          self.title, self.header, self.label];
+        self.isNoticeMessage = NO;
         
-        self.choices = dictionary[@"choices"];
-        if (self.choices == nil)
-            self.choices = defaultValues[@"choices"];
+        if ([dictionary isKindOfClass:[NSDictionary class]]) {
+            //NSAssert1(dictionary[@"data"] == nil, @"questions dictionary should not contain data key", dictionary);
+            _type = dictionary[@"type"];
+            _state = dictionary[@"state"];
+            _title = dictionary[@"title"];
+            _header = dictionary[@"header"];
+            _uniqueId = [dictionary[@"id"] integerValue];
+            _connectionId = [dictionary[@"connectionId"] integerValue];
+            
+            NSDictionary *defaultValues = [self defaultValuesForQuestionType:self.type];
+            self.key = dictionary[@"key"];
+            if (self.key == nil)
+                self.key = defaultValues[@"key"];
+            if (self.key.length == 0)
+                self.key = nil;
+            
+            self.label = dictionary[@"label"];
+            if (self.label == nil)
+                self.label = defaultValues[@"prompt"];
+            if (self.label.length == 0)
+                self.label = nil;
+            // This is really just useful for Chase account verification where
+            // we get sent back a title, header, and label. For now we just munge
+            // them all together.
+            if (self.header != nil)
+                self.label = [NSString stringWithFormat:@"%@\n%@\n%@",
+                              stringNotNil(self.title), stringNotNil(self.header), stringNotNil(self.label)];
+            
+            self.choices = dictionary[@"choices"];
+            if (self.choices == nil)
+                self.choices = defaultValues[@"choices"];
+        }
     }
     
     return self;
+}
+
+- (void)addInformationWithDictionary:(NSDictionary*)dictionary { //Loc Cao
+    _type = dictionary[@"type"];
+    _state = dictionary[@"state"];
+    _uniqueId = [dictionary[@"id"] integerValue];
+    _connectionId = [dictionary[@"connectionId"] integerValue];
+    
+    NSDictionary *defaultValues = [self defaultValuesForQuestionType:self.type];
+    self.key = dictionary[@"key"];
+    if (self.key == nil)
+        self.key = defaultValues[@"key"];
+    if (self.key.length == 0)
+        self.key = nil;
 }
 
 - (NSString *)description {
@@ -236,7 +252,8 @@
             displayValuesFile = [[NSBundle mainBundle] pathForResource:@"FTQuestion" ofType:@".plist"];
         sDefaultValues = [[NSDictionary alloc] initWithContentsOfFile:displayValuesFile];
     });
-    
+
+    if (!questionType) questionType = @"unknown";
     NSDictionary *values = sDefaultValues[questionType];
     if (!values) {
         // unknown question type...
@@ -254,6 +271,10 @@
 
 - (BOOL)isCredentials {
     return [self.type isEqualToString:@"credentials"];
+}
+
+- (BOOL)isActionRequired {
+    return [self.type isEqualToString:@"user_action_required"];
 }
 
 //- (NSString *)type {

@@ -6,8 +6,8 @@
 //  Copyright (c) 2012 filethis.com. All rights reserved.
 //
 
+#import <Crashlytics/Crashlytics.h>
 #import "AFJSONRequestOperation.h"
-#import "TestFlight.h"
 
 #import "AppleStoreObserver.h"
 
@@ -25,9 +25,11 @@
 
 #import "CommonVar.h"
 #import "OrderedDictionary.h"
+#import "FTMobileAppDelegate.h"
 
 // operands for talking to server
 NSString *FTLoginNotification = @"weblogin";
+NSString *FTRenewPasswordNotification = @"webnewpassword";
 NSString *FTLoadinFailedNotification = @"loadinnoworkie";
 NSString *FTLoggedInNotification = @"loggedin";
 NSString *FTLogout = @"userlogout";
@@ -52,6 +54,7 @@ NSString *FTPurchase = @"billingapplepurchase";
 
 // app-internal notifications
 NSString *FTGotQuestions = @"gotquestions";
+NSString *FTGotConnections = @"gotconnections";
 NSString *FTAnsweredQuestion = @"answerquestion";
 NSString *FTConnectionDeleted = @"connectiondeleted";
 
@@ -150,16 +153,13 @@ static NSURL *_logosURL;
         //        } else {
         //            NSLog(@"UIDevice doesn't respond to scale");
         //        }
-        if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
-            dpi = 132 * scale;
-        } else if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
+//        if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
+//            dpi = 132 * scale;
+//        } else if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
             dpi = 163 * scale;
-        }
+//        }
         NSString *relativePath = [NSString stringWithFormat:@"/static/logos/%.0f/", dpi];
         _logosURL = [[NSURL alloc] initWithString:relativePath relativeToURL:[self secureURL]];
-#ifdef DEBUG
-        NSLog(@"logos url = %@", [_logosURL absoluteString]);
-#endif
     }
     return _logosURL;
 }
@@ -184,8 +184,20 @@ static NSString *_hostName;
     _imagesURL = nil;
 }
 
+//Loc test
+BOOL test = NO;
++ (void)setTest {
+    test = YES;
+}
+//---
+
 + (NSString *)hostName
 {
+    //Loc test
+    if (test) {
+        //return @"astaging.filethis.com";
+    }
+    //---
     if (!_hostName) {
 #ifdef DEBUG
         _hostName = [[NSUserDefaults standardUserDefaults] objectForKey:@"HOSTNAME"];
@@ -201,6 +213,12 @@ static NSString *_hostName;
 - (id) init
 {
     if ((self = [super initWithBaseURL:[[self class] secureURL]])) {
+        
+        //Cuong: debug crash
+#ifdef DEBUG_TEST_NULL_CURRENT_DESTINATION_AFTER_REACTIVATING_APP
+        self.app_is_reactivating = NO;
+#endif
+        
         [self registerHTTPOperationClass:[AFJSONRequestOperation class]];
         // Accept HTTP Header; see http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.1
         [self setDefaultHeader:@"Accept" value:@"application/json"];
@@ -215,7 +233,7 @@ static NSString *_hostName;
         NSString *userAgent = [self defaultValueForHeader:@"User-Agent"];
         userAgent = [NSString stringWithFormat:@"%@, FileThis Mobile", userAgent];
         [self setDefaultHeader:@"User-Agent" value:userAgent];
-#ifdef DEBUG
+#ifdef ENABLE_NSLOG_REQUEST
         NSLog(@"user-agent=%@", [self defaultValueForHeader:@"User-Agent"]);
 #endif
     }
@@ -276,7 +294,7 @@ static NSString *_hostName;
 
 - (BOOL)validateLoginResponse:(id)json
 {
-#ifdef DEBUG
+#ifdef ENABLE_NSLOG_REQUEST
     NSLog(@"received data %@", json);
 #endif
     NSString *result = json[@"result"];
@@ -317,6 +335,7 @@ static NSString *_hostName;
 
 - (void)refreshCurrentDestination
 {
+    [(FTMobileAppDelegate*)[UIApplication sharedApplication].delegate clearData];   //Cuong
     AFHTTPRequestOperation *op = [self getCurrentDestinationOperation];
     [self enqueueAuthenticatedOperation:op];
 }
@@ -338,7 +357,7 @@ static NSString *_hostName;
         success(destinations);
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
         if (![operation isCancelled])
-            [self handleError:error withTitle:@"Cannot Load Data" withResponse:operation.response];
+            [self handleError:error withTitle:@"" withResponse:operation.response];
     }];
     
     return op;
@@ -347,17 +366,18 @@ static NSString *_hostName;
 - (AFJSONRequestOperation *)getDestinations
 {
     AFJSONRequestOperation *operation = [self getDestinationsOperation:^(NSArray *json) {
-#ifdef DEBUG
-        NSLog(@"got %d destinations", [json count]);
+
+#ifdef ENABLE_NSLOG_REQUEST
+        NSLog(@"got %d destinations: %@", [json count], [json description]);
 #endif
 
         NSMutableArray *destinations = [NSMutableArray arrayWithCapacity:json.count];
         for (NSDictionary *d in json)
         {
-            if ([[d objectForKey:@"type"] isEqualToString:@"conn"]) {
+//            if ([[d objectForKey:@"type"] isEqualToString:@"conn"]) {     //Cuong
                 FTDestination *destination = [[FTDestination alloc] initWithDictionary:d];
                 [destinations addObject:destination];
-            }
+//            }
         }
         self.destinations = [NSArray arrayWithArray: destinations];
         [[NSNotificationCenter defaultCenter] postNotificationName:FTListDestinations object:destinations userInfo:NULL];
@@ -402,26 +422,39 @@ static NSString *_hostName;
 }
 
 - (void)loggedOut:(id)sender{
-#ifdef DEBUG
+#ifdef ENABLE_NSLOG_REQUEST
     NSLog(@"logged out ack");
 #endif
 }
 
 - (BOOL)deleteNthInstitutionConnection:(NSInteger) n {
-    FTConnection *connection = [self.connections objectAtIndex:n];
+    FTConnection *connection = nil;
+    @synchronized (self) {
+        //try catch to avoid out of range exception
+        @try {
+            if ( (n >= 0) && (n < self.connections.count) )
+                connection = [self.connections objectAtIndex:n];
+        } @catch (NSException *exception) {
+        }
+    }
+    
     [connection destroy];
     return NO;
 }
 
 -(void)updateInstitutions:(NSNotification *)notification {
     NSArray *institutions = notification.object;
-    NSAssert([institutions count] > 0, @"non-empty list");
-    if (self.institutions) {
+    //NSAssert([institutions count] > 0, @"non-empty list");
+    
+    /*if (self.institutions) {
         NSAssert([self.institutions count] == [institutions count], @"cannot merge disjoint institutions");
-        // merge
+        //merge
     } else {
         self.institutions = [institutions copy];
-    }
+    }*/
+    
+    self.institutions = [institutions copy];
+    
     [[NSNotificationCenter defaultCenter] postNotificationName:FTListInstitutions object:self.institutions];
 }
 
@@ -452,7 +485,7 @@ static NSString *_hostName;
 #endif
 
 - (void)logRequest:(NSURLRequest *)request withResponse:(NSHTTPURLResponse *)response withJSON:(id)json withMessage:(NSString *)message withError:(NSError *)error {
-#ifdef DEBUG
+#ifdef ENABLE_NSLOG_REQUEST
     if (error)
         NSLog(@"%@ request=%@, json=%@, error=%@", message, [[request URL] parameterString], json, error);
     else
@@ -478,6 +511,9 @@ static NSString *_hostName;
     invalid_receipt - The receipt was found to be invalid. You shouldn't ever see this response, but if you do, maybe there's something you could tell the user.
     failure - Something went wrong, either in the server's interaction with the Apple store when validating the receipt, or in the server code itself. You'll need to retry later.
 */
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 - (void)purchase:(SKPaymentTransaction *)transaction
      withSuccess:(void (^)(NSString *result))success
      withFailure:(void (^)(NSError *error))failure
@@ -497,6 +533,7 @@ static NSString *_hostName;
         }];
     [self enqueueAuthenticatedOperation:operation];    
 }
+#pragma GCC diagnostic pop
 
 -(FTInstitution *)institutionWithId:(NSInteger)institutionId {
     for (FTInstitution *institution in self.institutions) {
@@ -563,6 +600,15 @@ static NSString *_hostName;
     }
 }
 
+- (void)cancelRequestConnectionsList {
+    [self.connectionsRequestOperation cancel];
+    [self.connectionsResponseProcessor cancel];
+    self.connectionsRequestOperation = nil;
+    self.connectionsResponseProcessor = nil;
+    self.validated = NO;
+    [self resetConnectionsRequest];
+}
+
 #pragma mark - Account Settings
 
 /*
@@ -579,7 +625,7 @@ static NSString *_hostName;
 - (void)connectToDestination:(FTDestination *)destination {
     
     [self getAuthenticationURLForDestination:destination.destinationId withSuccess:^(id authurl) {
-#ifdef DEBUG
+#ifdef ENABLE_NSLOG_REQUEST
         NSLog(@"connection to %@", authurl);
 #endif
     }];
@@ -608,7 +654,9 @@ static NSString *_hostName;
 }
 
 - (FTConnection *)connectionAtIndex:(NSUInteger)index {
-    return [self.connections objectAtIndex:index];
+    if (self.connections && [self.connections count] > 0)
+        return [self.connections objectAtIndex:index];
+    return nil;
 }
 
 - (void)removeConnectionAtIndex:(NSUInteger)index {
@@ -636,7 +684,7 @@ static NSString *_hostName;
         NSData *data = [dataString dataUsingEncoding:NSUTF8StringEncoding];
         id json = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments error:&error];
         if (json == nil) {
-#ifdef DEBUG
+#ifdef ENABLE_NSLOG_REQUEST
             NSString *s = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
             NSLog(@"%@ parsing JSON string:%@", error, s);
 #endif
@@ -655,7 +703,18 @@ static NSString *_hostName;
             FTQuestion *question = [[FTQuestion alloc] initWithDictionary:questionableValues];
             [newQuestions addObject:question];
         }
-        return newQuestions;
+        
+        if (newQuestions.count > 0) {
+            return newQuestions;
+        }
+        
+        //+++++
+        //Handle the case when there is no questions but there is notice message
+        FTQuestion *ques = [[FTQuestion alloc] initWithDictionary:json];
+        [ques addInformationWithDictionary:questionsDictionary];
+        ques.isNoticeMessage = YES;
+        return @[ques];
+        //-----
     }
     
     return @[[[FTQuestion alloc] initWithDictionary:questionsDictionary]];
@@ -682,6 +741,10 @@ static NSString *_hostName;
      Note: we don't add the questions to our list of connections because of thread-safety concerns.
      Maybe we should... For now, post notification which will be process on main runloop.
      */
+    
+#ifdef DEBUG_SET_USER_ACTION_REQUIRED_FOR_1ST_CREDENTIALS_QUESTION
+    BOOL isFisrtCredentialsQuestion = YES;
+#endif
     NSMutableArray *relevantQuestions = [NSMutableArray arrayWithCapacity:questionsData.count];
     int numMissing = 0;
     int numExisting = 0;
@@ -695,20 +758,38 @@ static NSString *_hostName;
             FTConnection *connection = [self findConnectionById:connectionId];
             if (connection != nil) {
                 [relevantQuestions addObjectsFromArray:[self parseQuestionsFromDictionary:questionDictionary]];
+                // [manhnn] Put questions into connections
+                for (FTQuestion *question in relevantQuestions) {
+                    FTConnection *conn = [self findConnectionById:question.connectionId];
+                    if (conn && ![conn.questions containsObject:question]) {
+                        [conn addQuestion:question];
+#ifdef DEBUG_SET_USER_ACTION_REQUIRED_FOR_1ST_CREDENTIALS_QUESTION
+                        if (isFisrtCredentialsQuestion) {
+                            if ([question isCredentials]) {
+                                question.type = @"user_action_required";
+                                question.key = nil;
+                                question.label = @"Please log into your account directly and respond to the question you are being asked there";
+                                isFisrtCredentialsQuestion = NO;
+                            }
+                        }
+#endif
+                    }
+                }
             } else {
                 // skip it - connection no longer around
                 numMissing++;
             }
         }
     }
+#ifdef ENABLE_NSLOG_REQUEST
     NSUInteger numQuestionsAdded = [relevantQuestions count];
-#ifdef DEBUG
     NSLog(@"%d questions active and added, %d skipped, %d missing connections", numQuestionsAdded, numExisting, numMissing);
 #endif
     
+    // [manhnn] Cannot post FTGotQuestions because the ConnectionViewController is not loaded yet.
     // if there are questions, let observers know about them
-    if (numQuestionsAdded != 0)
-        [[NSNotificationCenter defaultCenter] postNotificationName:FTGotQuestions object:relevantQuestions userInfo:nil];
+    //if (numQuestionsAdded != 0)
+        //[[NSNotificationCenter defaultCenter] postNotificationName:FTGotQuestions object:relevantQuestions userInfo:nil];
 }
 
 - (void)requestQuestions {
@@ -722,7 +803,7 @@ static NSString *_hostName;
                         });
                     }
                     failure:^(NSURLRequest *request, NSHTTPURLResponse *response, NSError *error, id JSON) {
-                        [self handleError:error withTitle:@"Cannot Load Data" withResponse:response];
+                        [self handleError:error withTitle:@"" withResponse:response];
                     }];
         [self enqueueAuthenticatedOperation:operation];
     });
@@ -787,7 +868,7 @@ static NSString *_hostName;
         {
             self.loginDisabled = NO;
             self.validated = NO;
-#ifdef DEBUG
+#ifdef ENABLE_NSLOG_REQUEST
             NSLog(@"Failed ping request: %@", error);
 #endif
             [[NSNotificationCenter defaultCenter] postNotificationName:FTPing object:error];
@@ -856,7 +937,7 @@ static NSString *_hostName;
 
 - (AFJSONRequestOperation *)getInstitutions:(void (^)(id JSON))success
 {
-#ifdef DEBUG
+#ifdef ENABLE_NSLOG_REQUEST
     NSLog(@"requesting institutions");
 #endif
     NSMutableURLRequest *req = [self requestForOperand:FTListInstitutions withParams:nil];
@@ -865,7 +946,7 @@ static NSString *_hostName;
         success(JSON);
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
         if (![operation isCancelled])
-            [self handleError:error withTitle:@"Cannot Load Data" withResponse:operation.response];
+            [self handleError:error withTitle:@"" withResponse:operation.response];
     }];
     
     return op;
@@ -873,19 +954,24 @@ static NSString *_hostName;
 
 - (AFJSONRequestOperation *)getConnections:(void (^)(id JSON))success
 {
-#ifdef DEBUG
+#ifdef ENABLE_NSLOG_REQUEST
     NSLog(@"requesting connections");
 #endif
     NSMutableURLRequest *request = [self requestForOperand:FTListConnections withParams:nil];
     AFJSONRequestOperation *op = [[AFJSONRequestOperation alloc] initWithRequest:request];
     [op setCompletionBlockWithSuccess:^(AFHTTPRequestOperation *operation, id JSON) {
+#ifdef ENABLE_NSLOG_REQUEST
+        NSLog(@"Response for connlist request: %@", JSON);
+#endif
         success(JSON);
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
         // retry connections request if error is out of user's control...
         // TODO: should we just retry connection request any time it fails?
         if ([error.domain isEqualToString:NSURLErrorDomain] && (error.code == NSURLErrorServerCertificateUntrusted || error.code == NSURLErrorCannotFindHost))
         {
+#ifdef ENABLE_NSLOG_REQUEST
             NSLog(@"rescheduling connection request after failed request (error=%d)", error.code);
+#endif
             double delayInSeconds = 0.5;
             dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
             dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delayInSeconds * NSEC_PER_SEC));
@@ -894,7 +980,7 @@ static NSString *_hostName;
             });
         } else {
             if (![operation isCancelled])
-                [self handleError:error withTitle:@"Cannot Load Data" withResponse:operation.response];
+                [self handleError:error withTitle:@"" withResponse:operation.response];
         }
     }];
     
@@ -908,7 +994,13 @@ static NSString *_hostName;
     NSURLRequest *request = [self requestForOperand:operand withParams:nil];
     AFJSONRequestOperation *op = [[AFJSONRequestOperation alloc] initWithRequest:request];
     [op setCompletionBlockWithSuccess:^(AFHTTPRequestOperation *operation, id JSON) {
-#ifdef DEBUG
+        
+        if ([NSThread isMainThread])
+            NSLog(@"getCurrentDestinationOperation - isMainThread");
+        else
+            NSLog(@"getCurrentDestinationOperation - NOT isMainThread");
+        
+#ifdef ENABLE_NSLOG_REQUEST
         NSLog(@"AFN got destination connections response=%@", JSON);
 #endif
         NSArray *jsons = JSON[@"connections"];
@@ -917,25 +1009,29 @@ static NSString *_hostName;
         if ([jsons count] == 1)
             currentDestination = [[FTDestinationConnection alloc] initWithDictionary:jsons[0]];
         
+        //Cuong: debug crash
+#ifdef DEBUG_TEST_NULL_CURRENT_DESTINATION_AFTER_REACTIVATING_APP
+        if (!self.app_is_reactivating) {
+            self.app_is_reactivating = YES;
+            currentDestination = nil;
+        }
+#endif
+        
         if (currentDestination != nil) {
             _currentDestination = currentDestination;
             if (currentDestination.needsAuthentication || currentDestination.needsRepair) {
-                [[NSNotificationCenter defaultCenter]
-                 postNotificationName:FTFixCurrentDestination object:currentDestination userInfo:nil];
+                [[NSNotificationCenter defaultCenter] postNotificationName:FTFixCurrentDestination object:currentDestination userInfo:nil];
             } else {
-                [[NSNotificationCenter defaultCenter]
-                 postNotificationName:operand object:currentDestination userInfo:nil];
+                [[NSNotificationCenter defaultCenter] postNotificationName:operand object:currentDestination userInfo:nil];
             }
         } else {
-            [[NSNotificationCenter defaultCenter]
-             postNotificationName:FTMissingCurrentDestination object:currentDestination userInfo:nil];
+            [[NSNotificationCenter defaultCenter] postNotificationName:FTMissingCurrentDestination object:currentDestination userInfo:nil];
         }
-#ifdef DEBUG
-        NSLog(@"current destination is %@", _currentDestination);
-#endif
+        CLS_LOG(@"Current destination id: %i, name: %@", _currentDestination.destinationId, _currentDestination.name);
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
         if (![operation isCancelled])
-            [self handleError:error withTitle:@"Cannot Load Data" withResponse:operation.response];
+            [self handleError:error withTitle:@"" withResponse:operation.response];
+        [[NSNotificationCenter defaultCenter] postNotificationName:FTFixCurrentDestination object:nil userInfo:nil]; //Post this event to stop loading data
     }];
     
 //    AFJSONRequestOperation *operation = [AFJSONRequestOperation JSONRequestOperationWithRequest:request
@@ -987,7 +1083,7 @@ static NSString *_hostName;
                 [[NSNotificationCenter defaultCenter] postNotificationName:FTGetAccountInfo object:self.settings userInfo:nil];
             }
             failure:^(NSURLRequest *request, NSHTTPURLResponse *response, NSError *error, id JSON) {
-                [self handleError:error withTitle:@"Cannot Load Data" withResponse:response];
+                [self handleError:error withTitle:@"" withResponse:response];
             }];
     [self disableCacheForOperation:operation];
     [self enqueueAuthenticatedOperation:operation];
@@ -1009,7 +1105,7 @@ static NSString *_hostName;
         [[NSNotificationCenter defaultCenter] postNotificationName:FTGetProductIdentifiers object:self.products userInfo:nil];
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
         if (![operation isCancelled])
-            [self handleError:error withTitle:@"Cannot Load Data"  withResponse:operation.response];
+            [self handleError:error withTitle:@""  withResponse:operation.response];
     }];
     
     [self disableCacheForOperation:op];
@@ -1032,8 +1128,27 @@ static NSString *_hostName;
                 success(JSON);
             }
             failure:^(NSURLRequest *request, NSHTTPURLResponse *response, NSError *error, id JSON) {
-                [self handleError:error withTitle:@"Cannot Load Data" withResponse:response];
+                [self handleError:error withTitle:@"" withResponse:response];
             }];
+    
+    [self enqueueAuthenticatedOperation:operation];
+}
+
+//Cuong
+- (void)connectToDestination:(NSInteger)destinationId username:(NSString*)username password:(NSString*)password withSuccess:(void (^)(id JSON))success {
+    NSMutableURLRequest *req = [self requestForOperand:FTConnectToDestination
+                                            withParams:@{@"id":@(destinationId),
+                                                         @"username" : username,
+                                                         @"password" : password,
+                                                         @"browseable" : @"false",
+                                                         @"flex" : @"true"}];
+    AFJSONRequestOperation *operation = [AFJSONRequestOperation JSONRequestOperationWithRequest:req
+                                                                                        success:^(NSURLRequest *request, NSHTTPURLResponse *response, id JSON) {
+                                                                                            success(JSON);
+                                                                                        }
+                                                                                        failure:^(NSURLRequest *request, NSHTTPURLResponse *response, NSError *error, id JSON) {
+                                                                                            [self handleError:error withTitle:@"Cannot verify destination credentials" withResponse:response];
+                                                                                        }];
     
     [self enqueueAuthenticatedOperation:operation];
 }
@@ -1084,6 +1199,35 @@ onFailure:(void (^)(NSURLRequest *request, NSHTTPURLResponse *response, NSError 
     [self enqueueHTTPRequestOperation:operation];
 }
 
+
+- (AFJSONRequestOperation *)renewPasswordOperationWithUser:(NSString *)username withPassword:(NSString *)password
+                                         onSuccess:(void (^)(id JSON))success
+                                         onFailure:(void (^)(NSURLRequest *request, NSHTTPURLResponse *response, NSError *error))failure
+{
+    NSMutableURLRequest *req = [self requestForOperand:FTRenewPasswordNotification
+                                            withParams:@{@"email":username, @"password" : password, @"password-repeat" : password}];
+    AFJSONRequestOperation *operation = [AFJSONRequestOperation JSONRequestOperationWithRequest:req
+                                                                                        success:^(NSURLRequest *request, NSHTTPURLResponse *response, id JSON) {
+                                                                                            success(JSON);
+                                                                                        }
+                                                                                        failure:^(NSURLRequest *request, NSHTTPURLResponse *response, NSError *error, id JSON) {
+                                                                                            failure(request, response, error);
+                                                                                        }];
+    
+    return operation;
+}
+
+- (void)renewPassword:(NSString *)username
+ withPassword:(NSString *)password
+    onSuccess:(void (^)(id JSON))success
+    onFailure:(void (^)(NSURLRequest *request, NSHTTPURLResponse *response, NSError *error))failure
+{
+    AFJSONRequestOperation *operation = [self renewPasswordOperationWithUser:username withPassword:password onSuccess:success onFailure:failure];
+    operation.queuePriority = NSOperationQueuePriorityVeryHigh;
+    [self disableCacheForOperation:operation];
+    [self enqueueHTTPRequestOperation:operation];
+}
+
 - (BOOL)isHTMLMessage:(NSString *)message
 {
     NSRange r = [message rangeOfString:@"<html><body>"];
@@ -1114,8 +1258,7 @@ onFailure:(void (^)(NSURLRequest *request, NSHTTPURLResponse *response, NSError 
     if (error.userInfo[@"NSDebugDescription"])
         m = [m stringByAppendingFormat:@"\n%@", error.userInfo[@"NSDebugDescription"]];
     
-    NSLog(@"Operation failed: %@, error=%@", m, error);
-    TFLog(@"Operation failed: %@, error=%@", m, error);
+    CLS_LOG(@"Operation failed: %@, error=%@", m, error);
 
     // extract operand from URL string
     dispatch_block_t block = ^{
@@ -1146,7 +1289,7 @@ onFailure:(void (^)(NSURLRequest *request, NSHTTPURLResponse *response, NSError 
     dispatch_once(&onceToken, ^{
         NSError *reError;
         extractFTException = [NSRegularExpression
-                    regularExpressionWithPattern:@"com\.filethis\.common\.exception\.(\\w+):(.+)"
+                    regularExpressionWithPattern:@"com.filethis.common.exception.(\\w+):(.+)"
                       options:nil error:&reError];
         NSAssert1(reError == nil, @"error for re: %@", reError);
     });
@@ -1162,12 +1305,36 @@ onFailure:(void (^)(NSURLRequest *request, NSHTTPURLResponse *response, NSError 
         BOOL isLoggedOut = self.ticket == nil;
         if (logOut && !isLoggedOut) {
             [self reset];
-            UINavigationController *root = (UINavigationController *) [[[UIApplication sharedApplication] keyWindow] rootViewController];
-            [root popToRootViewControllerAnimated:YES];
+            UINavigationController *root;
+            //root = (UINavigationController *) [[[UIApplication sharedApplication] keyWindow] rootViewController];
+            FTMobileAppDelegate *app = (FTMobileAppDelegate*)[UIApplication sharedApplication].delegate;
+            root = app.navigationController; //Loc Cao
+            if ([root isKindOfClass:[UINavigationController class]]) {
+                [root popToRootViewControllerAnimated:YES];
+            }
+        } else {
+            //+++Loc Cao
+            NSError *reError;
+            NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"com.filethis.common.exception.(\\w+):(.+)" options:NSRegularExpressionCaseInsensitive error:&reError];
+            NSTextCheckingResult *textCheckingResult = [regex firstMatchInString:suggestion options:0 range:NSMakeRange(0, suggestion.length)];
+            if (textCheckingResult.numberOfRanges >= 3) {
+                NSRange matchRange = [textCheckingResult rangeAtIndex:2];
+                NSString *match = [suggestion substringWithRange:matchRange];
+                if (match.length > 0) {
+                    message = match;
+                } else {
+                    message = suggestion;
+                }
+            }
+            //---
         }
     } else {
         if ([self isHTMLMessage:message])
             message = [self stripHTMLFromMessage:message];
+    }
+    
+    if (error.code == DOMAIN_ERROR_CODE) {
+        message = NSLocalizedString(@"ID_COMMUNICATION_COMMON_ERROR", @"");
     }
     
     time_t now;
@@ -1272,14 +1439,14 @@ onFailure:(void (^)(NSURLRequest *request, NSHTTPURLResponse *response, NSError 
 }
 
 - (void)enqueueProcessingOperation:(NSOperation *)operation {
-    @synchronized(self.processingQueue) {   //Cuong: try to avoid crash: Fatal Exception NSInvalidArgumentException *** -[NSOperationQueue addOperation:]: operation is already enqueued on a queue
+    @synchronized(self) {   //Cuong: try to avoid crash: Fatal Exception NSInvalidArgumentException *** -[NSOperationQueue addOperation:]: operation is already enqueued on a queue
         if (![self.processingQueue.operations containsObject:operation])
             [self.processingQueue addOperation:operation];
     }
 }
 
 - (void)checkQueues {
-#ifdef DEBUG
+#ifdef ENABLE_NSLOG_REQUEST
     NSLog(@"%d operations in %@", self.processingQueue.operationCount, self.processingQueue.name);
     for (NSOperation *op in self.processingQueue.operations) {
         NSLog(@"op %@, ready=%d, executing=%d, cancelled=%d, concurrent=%d, %@", op,
@@ -1290,10 +1457,10 @@ onFailure:(void (^)(NSURLRequest *request, NSHTTPURLResponse *response, NSError 
         NSLog(@"op %@, ready=%d, executing=%d, cancelled=%d, concurrent=%d, %@", op,
               op.isReady, op.isCancelled, op.isExecuting, op.isConcurrent, op.dependencies);
     }
+#endif
 
     if (self.processingQueue.operationCount > 0)
         [self performSelector:@selector(checkQueues) withObject:nil afterDelay:15.0];
-#endif
 }
 
 /* load all the data required to login
@@ -1306,25 +1473,43 @@ onFailure:(void (^)(NSURLRequest *request, NSHTTPURLResponse *response, NSError 
         current destination
  
  */
-- (void)startup
-{
+
+- (void)loadDestinations {
+    // only request destinations if we haven't already loaded them...
+    AFJSONRequestOperation *destinationsOperation = nil;
+    if (!self.destinations) {
+        destinationsOperation = [self getDestinations];
+        [self enqueueHTTPRequestOperation:destinationsOperation];
+    }
+    
+    AFJSONRequestOperation *currentDestinationOperation = [self getCurrentDestinationOperation];
+    
+    if (destinationsOperation)
+        [currentDestinationOperation addDependency:destinationsOperation];
+    [self enqueueHTTPRequestOperation:currentDestinationOperation];
+}
+
+- (void)startup {
     self.validated = YES;
     ProcessInstitutionsOperation *processInstitutions = nil;
     AFJSONRequestOperation *getInstitutions = nil;
+    
+    //moved code to loadDestinations...
+    
     if (!self.institutions) {
         NSURLRequest *req = [self requestForOperand:FTListInstitutions withParams:nil];
         getInstitutions = [AFJSONRequestOperation JSONRequestOperationWithRequest:req
             success:^(NSURLRequest *request, NSHTTPURLResponse *response, id JSON) {
                 NSAssert1(JSON[@"institutions"] != nil, @"JSON[institutions] is nil? %@", JSON);
                 [ProcessInstitutionsOperation processInstitutions:JSON[@"institutions"]];
-#ifdef DEBUG
+#ifdef ENABLE_NSLOG_REQUEST
                 NSLog(@"getInstitutions finished=%d", getInstitutions.isFinished);
 #endif
                 [self performSelector:@selector(checkQueues) withObject:nil afterDelay:0.0];
             }
             failure:^(NSURLRequest *request, NSHTTPURLResponse *response, NSError *error, id JSON)
             {
-                [self handleError:error withTitle:@"Cannot Load Data" withResponse:response];
+                [self handleError:error withTitle:@"" withResponse:response];
             }];
         
 //        getInstitutions = [self getInstitutions:^(id JSON) {
@@ -1355,22 +1540,8 @@ onFailure:(void (^)(NSURLRequest *request, NSHTTPURLResponse *response, NSError 
         [self enqueueProcessingOperation:self.connectionsResponseProcessor];
     } else {
         // FIXME: why is connections request already finished?
-        TFLog(@"connections request is already finished at startup?");
+        CLS_LOG(@"connections request is already finished at startup?");
     }
-    
-    // only request destinations if we haven't already loaded them...
-    AFJSONRequestOperation *destinationsOperation = nil;
-    if (!self.destinations) {
-        destinationsOperation = [self getDestinations];
-        [self enqueueHTTPRequestOperation:destinationsOperation];
-    }
-
-    AFJSONRequestOperation *currentDestinationOperation =
-                        [self getCurrentDestinationOperation];
-
-    if (destinationsOperation)
-        [currentDestinationOperation addDependency:destinationsOperation];
-    [self enqueueHTTPRequestOperation:currentDestinationOperation];
 
     NSTimeInterval delayInSeconds = 1.0; // 1s
     dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delayInSeconds * NSEC_PER_SEC));
@@ -1380,4 +1551,15 @@ onFailure:(void (^)(NSURLRequest *request, NSHTTPURLResponse *response, NSError 
     });
 }
 
+- (BOOL)isUsingFTDestination {
+    if (self.currentDestination) {
+        FTDestination *dest = [FTDestination destinationWithId:self.currentDestination.destinationId];
+        if (dest) {
+            if ([dest.provider isEqualToString:@"this"]) {
+                return YES;
+            }
+        }
+    }
+    return NO;
+}
 @end

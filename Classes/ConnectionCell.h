@@ -12,6 +12,14 @@
 @interface ConnectionCell : UITableViewCell {
 }
 
+@property (strong, nonatomic) IBOutlet UILabel *statusLabel;
+@property (strong, nonatomic) IBOutlet UIButton *refreshButton;
+@property (strong, nonatomic) IBOutlet UIButton *resolveButton;
+@property (strong, nonatomic) IBOutlet UIImageView *iconImage;
+@property (strong, nonatomic) IBOutlet UIButton *errorButton;
+@property (strong, nonatomic) IBOutlet UIActivityIndicatorView *activityIndicator;
+@property (strong, nonatomic) IBOutlet UIImageView *arrowIndicatorImageView;
+
 @property (strong, nonatomic) FTConnection *connection;
 @property (weak) id host;
 @property (strong, nonatomic) IBOutlet UILabel *nameLabel;

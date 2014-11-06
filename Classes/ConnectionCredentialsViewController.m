@@ -50,6 +50,8 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    CLS_LOG(@"%@ viewDidLoad:", [[self class] description]);
+    
     self.institutionName.text = _institution.name;
     [self.logo setImageWithURL:_institution.logoURL placeholderImage:[FTInstitution placeholderImage]];
     
@@ -148,7 +150,12 @@
     if (textField == self.username) {
         [self.password becomeFirstResponder];
     } else if (textField == self.password) {
-        [self performSelectorOnMainThread:@selector(connect:) withObject:textField waitUntilDone:NO];
+        if ( ([self.username.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]].length > 0)
+            && (([self.password.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]].length > 0)) ) {
+            [self performSelectorOnMainThread:@selector(connect:) withObject:textField waitUntilDone:NO];
+        } else {
+            [self.username becomeFirstResponder];
+        }
     }
     return YES;
 }

@@ -21,6 +21,8 @@
 @property (readonly) BOOL needsAuthentication;
 @property (readonly) BOOL needsRepair;
 
+@property (nonatomic, strong) NSString *provider;
+
 - (id)initWithDictionary:(NSDictionary *)dictionary;
 - (void)launchApplication;
 - (BOOL)canLaunchApplication;

@@ -158,13 +158,6 @@ account	Object
     return self;
 }
 
-- (void)dealloc
-{
-#ifdef DEBUG
-    NSLog(@"dealloc %@", self);
-#endif
-}
-
 #pragma mark - access User properties
 - (id)userValueForKey:(NSString *)key {
     return [self.store valueForKey:@"users"][0][key];
@@ -233,6 +226,14 @@ account	Object
     return [self.store valueForKey:@"priorLoginDate"];
 }
 
+- (double)storage {
+    return [[self.store valueForKey:@"storage"] doubleValue];
+}
+
+- (double)storageQuota {
+    return [[self.store valueForKey:@"storageQuota"] doubleValue];
+}
+
 - (NSString *)autoRenewsOn {
     NSString *date = nil;
     if (self.isSubscriber) {
@@ -265,6 +266,14 @@ account	Object
 
 - (void)setEmailFailures:(BOOL)emailFailure {
     [self setBool:emailFailure forKey:@"emailFailure"];
+}
+
+- (BOOL)autoClassify {
+    return [self boolForKey:@"autoClassify"];
+}
+
+- (void)setAutoClassify:(BOOL)value {
+    [self setBool:value forKey:@"autoClassify"];
 }
 
 /*
@@ -311,13 +320,14 @@ account	Object
 {
     NSTimeInterval seconds = [epoch doubleValue];
     NSDate *date = [NSDate dateWithTimeIntervalSince1970:seconds];
-#ifndef NDEBUG
-    NSTimeInterval range = 60 /* seconds */ * 60 /* minutes */ * 24 /* hours */ * 365 /* days */ * 3 /* years */;
-    NSDate *min = [NSDate dateWithTimeIntervalSinceNow:-range];
-    NSDate *max = [NSDate dateWithTimeIntervalSinceNow:range];
-    assert([date compare:max] == NSOrderedAscending && "bad date?");
-    assert([date compare:min] == NSOrderedDescending && "bad date?");
-#endif
+//Cuong: ignore assert
+//#ifndef NDEBUG
+//    NSTimeInterval range = 60 /* seconds */ * 60 /* minutes */ * 24 /* hours */ * 365 /* days */ * 3 /* years */;
+//    NSDate *min = [NSDate dateWithTimeIntervalSinceNow:-range];
+//    NSDate *max = [NSDate dateWithTimeIntervalSinceNow:range];
+//    assert([date compare:max] == NSOrderedAscending && "bad date?");
+//    assert([date compare:min] == NSOrderedDescending && "bad date?");
+//#endif
     return [NSDateFormatter localizedStringFromDate:date dateStyle:NSDateFormatterLongStyle timeStyle:NSDateFormatterNoStyle];
 }
 
@@ -330,6 +340,44 @@ account	Object
                     NSDateFormatterLongStyle : NSDateFormatterShortStyle;
 
     return [NSDateFormatter localizedStringFromDate:date dateStyle:dateStyle timeStyle:timeStyle];
+}
+
+#pragma mark - Property accessors - CRP
+- (int)totalConnectionQuota {
+    return [[self.store valueForKey:@"totalSourceConnectionQuota"] intValue];
+}
+
+- (double)totalStorageQuota {
+    return [[self.store valueForKey:@"totalStorageQuota"] doubleValue];
+}
+
+- (int)totalConnectionUsage {
+    return [[self.store valueForKey:@"totalSourceConnectionUsage"] intValue];
+}
+
+- (double)totalStorageUsage {
+    return [[self.store valueForKey:@"totalStorageUsage"] doubleValue];
+}
+
+//---
+- (int)subscriptConnectionQuota {
+    return [[self.store valueForKey:@"subscriptionSourceConnectionQuota"] intValue];
+}
+
+- (double)subscriptStorageQuota {
+    return [[self.store valueForKey:@"subscriptionStorageQuota"] doubleValue];
+}
+
+- (int)refConnectionQuota {
+    return [[self.store valueForKey:@"referralSourceConnectionQuota"] intValue];
+}
+
+- (double)refStorageQuota {
+    return [[self.store valueForKey:@"referralStorageQuota"] doubleValue];
+}
+
+- (NSString*)socialMediaMessage {
+    return [self.store valueForKey:@"socialMediaMessage"];
 }
 
 #pragma mark Server-Side/Client-Side processing
@@ -381,7 +429,7 @@ account	Object
 - (NSDictionary *)changes
 {
     NSArray *   mutableKeys = @[@"timeoutMinutes", @"useTimeout", @"first", @"last", @"email",
-                             @"emailSuccess", @"emailFailure", @"emailCampaign" ];
+                             @"emailSuccess", @"emailFailure", @"emailCampaign", @"autoClassify" ];
     NSMutableDictionary *updates = [[NSMutableDictionary alloc] initWithCapacity:mutableKeys.count];
     
     [self.store enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {

@@ -24,11 +24,14 @@
 - (void)setRight:(float)right;
 - (void)setRight:(float)right top:(float)top;
 - (void)setRight:(float)right bottom:(float)bottom;
+- (void)setRightWithoutChangingLeft:(float)right;
 - (void)setTop:(float)top;
 - (void)setTop:(float)top height:(float)h;
 - (void)setTop:(float)top bottom:(float)bottom;
 - (void)setBottom:(float)bottom;
+- (void)setBottomWithoutChangingTop:(float)bottom;
 - (void)setOrigin:(CGPoint)origin;
+- (void)setRightWithoutChangingLeft:(float)right bottomWithoutChangingTop:(float)bottom;
 
 #pragma mark move left,right,top,bottom
 - (void)moveToLeftOfView:(UIView*)vw offset:(float)offset;
@@ -36,6 +39,7 @@
 - (void)moveToTopOfView:(UIView*)vw offset:(float)offset;
 - (void)moveToBottomOfView:(UIView*)vw offset:(float)offset;
 - (void)moveToHorizontalCenterOfSuperView;
+- (void)moveToCenterOfSuperView;
 
 #pragma mark get rect at left,right,top,bottom
 - (CGRect)rectAtLeft:(float)offset width:(float)width;
@@ -50,6 +54,7 @@
 - (CGRect)innerRectAtRight:(float)offset width:(float)width height:(float)height;
 
 - (CGRect)rectAtTop:(float)offset height:(float)height;
+- (CGRect)rectAtTop:(float)offset width:(float)width height:(float)height;
 - (CGRect)rectAtBottom:(float)offset height:(float)height;
 - (CGRect)rectAtBottom:(float)offset width:(float)width height:(float)height;
 
@@ -77,4 +82,6 @@
 #pragma mark SubViews
 - (void)removeAllSubViews;
 - (void)relayout;
+
+- (BOOL)containsTouch:(UITouch*)touch;
 @end

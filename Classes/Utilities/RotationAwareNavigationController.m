@@ -7,6 +7,7 @@
 //
 
 #import "RotationAwareNavigationController.h"
+#import "CommonVar.h"
 
 @implementation RotationAwareNavigationController
 
@@ -18,14 +19,23 @@
 }
 
 - (BOOL)shouldAutorotate {
+    if ([CommonVar lockedOrientation])
+        return NO;
+    
     UIViewController *frontMost = [self frontMost];
     if (frontMost != nil)
         return [frontMost shouldAutorotate];
-    else
-        return [super shouldAutorotate];
+    
+    return [super shouldAutorotate];
 }
 
 - (NSUInteger)supportedInterfaceOrientations {
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
+        return UIInterfaceOrientationMaskPortrait;
+    
+    if ([CommonVar lockedOrientation])
+        return UIInterfaceOrientationMaskPortrait;
+    
     UIViewController *frontMost = [self frontMost];
     if (frontMost != nil)
         return [frontMost supportedInterfaceOrientations];
@@ -34,6 +44,12 @@
 }
 
 - (UIInterfaceOrientation)preferredInterfaceOrientationForPresentation {
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
+        return UIInterfaceOrientationPortrait;
+    
+    if ([CommonVar lockedOrientation])
+        return UIInterfaceOrientationPortrait;
+    
     UIViewController *frontMost = [self frontMost];
     if (frontMost != nil)
         return [frontMost preferredInterfaceOrientationForPresentation];

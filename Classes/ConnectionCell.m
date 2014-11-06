@@ -13,23 +13,18 @@
 #import "UIImageView+AFNetworking.h"
 #import "UIKitExtensions.h"
 #import "CommonLayout.h"
-
+#import "Constants.h"
+#import "UILabel+Style.h"
 
 @interface ConnectionCell ()
-
-@property (strong, nonatomic) IBOutlet UILabel *statusLabel;
-@property (strong, nonatomic) IBOutlet UIButton *refreshButton;
-@property (strong, nonatomic) IBOutlet UIButton *resolveButton;
-@property (strong, nonatomic) IBOutlet UIImageView *iconImage;
-@property (strong, nonatomic) IBOutlet UIButton *errorButton;
-@property (strong, nonatomic) IBOutlet UIActivityIndicatorView *activityIndicator;
-@property (strong, nonatomic) IBOutlet UIImageView *arrowIndicatorImageView;
 @end
 
 @implementation ConnectionCell
 
 - (id)initWithTableView:(UITableView*)tableView reuseIdentifier:(NSString *)reuseIdentifier {
     if (self = [super initWithStyle:UITableViewCellStyleDefault reuseIdentifier:reuseIdentifier]) {
+        BOOL isiPhone = IS_IPHONE;
+        
         float width = tableView.frame.size.width;
         float cellHeight = tableView.rowHeight;
         //NSLog(@"ConnectionCell - width %.2f height %.2f",width,cellHeight);
@@ -41,31 +36,30 @@
         else
             labelOffset = 30;
         
-        self.iconImage = [[UIImageView alloc] initWithFrame:CGRectMake(8, cellHeight/2 - 21, 90, 42)];
+        self.iconImage = [[UIImageView alloc] initWithFrame:CGRectMake(20, 4, 130, cellHeight-8)];
         self.iconImage.contentMode = UIViewContentModeScaleAspectFit;
         [self.contentView addSubview:self.iconImage];
         
-        self.nameLabel = [CommonLayout createLabel:CGRectMake(98 + labelOffset, 8, width - 138 - labelOffset, 18) font:[UIFont boldSystemFontOfSize:18.0] textColor:[UIColor blackColor] backgroundColor:nil text:@"" superView:self.contentView];
-        self.nameLabel.textAlignment = NSTextAlignmentLeft;
-        self.nameLabel.adjustsFontSizeToFitWidth = YES;
-        self.nameLabel.minimumScaleFactor = 0.2;
-        self.nameLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+        self.nameLabel = [CommonLayout createLabel:CGRectMake([self.iconImage right] + labelOffset, 10, width - 138 - labelOffset, 30) font:[CommonLayout getFont:(isiPhone ? FontSizeXSmall : FontSizeMedium) isBold:NO] textColor:kTextGrayColor backgroundColor:nil text:@"" superView:self.contentView];
         
-        self.statusLabel = [CommonLayout createLabel:CGRectMake(98 + labelOffset, 28, width - 138 - labelOffset, cellHeight - 32) font:[UIFont systemFontOfSize:11.0] textColor:[UIColor blackColor] backgroundColor:nil text:@"" superView:self.contentView];
+        //Fix bug: Font and Color should be consistant with DocumentCell
+        [self.nameLabel setFont:[UIFont fontWithName:@"Merriweather" size:kFontSizeNormal] textColor:kCabColorAll backgroundColor:nil text:nil numberOfLines:1 textAlignment:NSTextAlignmentLeft];
+        
+        self.statusLabel = [CommonLayout createLabel:CGRectMake([self.iconImage right] + labelOffset, 38, width - 40 - [self.iconImage right] - labelOffset, cellHeight - 42) font:[CommonLayout getFont:(isiPhone ? FontSizexXSmall : FontSizeSmall) isBold:NO isItalic:YES] textColor:[UIColor blackColor] backgroundColor:[UIColor clearColor] text:@"" superView:self.contentView];
+        //Fix bug: Font and Color should be consistant with DocumentCell
+        self.statusLabel.font = [UIFont fontWithName:@"Merriweather-Italic" size:kFontSizeSmall];
         self.statusLabel.textAlignment = NSTextAlignmentLeft;
         self.statusLabel.numberOfLines = 2;
-        self.statusLabel.adjustsFontSizeToFitWidth = YES;
-        self.statusLabel.minimumScaleFactor = 0.2;
-        self.statusLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth;
         
-        self.refreshButton = [CommonLayout createImageButton:CGRectMake(width - 40, cellHeight/2 - 20, 40, 40) image:[UIImage imageNamed:@"glyphicons_081_refresh.png"] contentMode:UIViewContentModeCenter touchTarget:self touchSelector:@selector(refresh:) superView:self.contentView];
+//        self.refreshButton = [CommonLayout createImageButton:CGRectMake(width - 55, cellHeight/2 - 20, 40, 40) image:[UIImage imageNamed:@"glyphicons_081_refresh.png"] contentMode:UIViewContentModeCenter touchTarget:self touchSelector:@selector(refresh:) superView:self.contentView];
+        self.refreshButton = [CommonLayout createImageButton:CGRectMake(width - 55, cellHeight/2 - 20, 40, 40) image:[UIImage imageNamed:@"refresh_icon_orange_small.png"] contentMode:UIViewContentModeCenter touchTarget:self touchSelector:@selector(refresh:) superView:self.contentView];
         self.refreshButton.tag = 1;
         self.refreshButton.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
         
         self.errorButton = [CommonLayout createImageButton:self.refreshButton.frame image:[UIImage imageNamed:@"glyphicons_196_circle_exclamation_mark.png"] contentMode:UIViewContentModeCenter touchTarget:self touchSelector:@selector(explain:) superView:self.contentView];
         self.errorButton.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
         
-        self.resolveButton = [CommonLayout createImageButton:self.refreshButton.frame image:[UIImage imageNamed:@"glyphicons_194_circle_question_mark.png"] contentMode:UIViewContentModeCenter touchTarget:self touchSelector:@selector(question:) superView:self.contentView];
+        self.resolveButton = [CommonLayout createImageButton:self.refreshButton.frame image:[UIImage imageNamed:@"key_icon.png"] contentMode:UIViewContentModeCenter touchTarget:self touchSelector:@selector(question:) superView:self.contentView];
         self.resolveButton.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
         
         self.activityIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
@@ -183,11 +177,13 @@
     CGFloat fontSize = self.statusLabel.font.pointSize;
     BOOL hasIssues = connection.hasError || connection.hasQuestion;
     if (hasIssues) {
-        self.statusLabel.font = [UIFont italicSystemFontOfSize:fontSize];
-        self.statusLabel.textColor = [UIColor redColor];
+        self.nameLabel.textColor = kGrayColor;
+        self.statusLabel.font = [CommonLayout getFont:fontSize isBold:NO isItalic:YES];
+        self.statusLabel.textColor = kTextOrangeColor;
     } else {
-        self.statusLabel.font = [UIFont systemFontOfSize:fontSize];
-        self.statusLabel.textColor = [UIColor blackColor];
+        self.nameLabel.textColor = kTextOrangeColor;
+        self.statusLabel.font = [CommonLayout getFont:fontSize isBold:NO isItalic:NO];
+        self.statusLabel.textColor = kTextGrayColor;
     }
     
 //    float width = self.contentView.frame.size.width;
@@ -198,6 +194,18 @@
 //    self.contentView.backgroundColor = [UIColor yellowColor];
     
     [self configureAccessoryWithEditing:editing];
+}
+
+- (void)layoutSubviews {
+    [super layoutSubviews];
+    
+    CGRect rect = self.nameLabel.frame;
+    rect.size.width = self.arrowIndicatorImageView.frame.origin.x - rect.origin.x - 15;
+    self.nameLabel.frame = rect;
+    
+    rect = self.statusLabel.frame;
+    rect.size.width = self.arrowIndicatorImageView.frame.origin.x - rect.origin.x - 15;
+    self.statusLabel.frame = rect;
 }
 
 - (IBAction)question:(UIButton *)sender {

@@ -22,27 +22,27 @@
 
 @interface SettingsViewController () <KKPasscodeSettingsViewControllerDelegate,  UITextFieldDelegate,UINavigationControllerDelegate>
 
-@property (weak, nonatomic) IBOutlet UITextField *firstNameField;
-@property (weak, nonatomic) IBOutlet UITextField *lastNameField;
-@property (weak, nonatomic) IBOutlet UITextField *emailField;
-@property (weak, nonatomic) IBOutlet UILabel *memberSinceLabel;
-@property (weak, nonatomic) IBOutlet UILabel *lastLoginLabel;
+@property (strong, nonatomic) IBOutlet UITextField *firstNameField;
+@property (strong, nonatomic) IBOutlet UITextField *lastNameField;
+@property (strong, nonatomic) IBOutlet UITextField *emailField;
+@property (strong, nonatomic) IBOutlet UILabel *memberSinceLabel;
+@property (strong, nonatomic) IBOutlet UILabel *lastLoginLabel;
 
-@property (weak, nonatomic) IBOutlet UILabel *servicePlan;
+@property (strong, nonatomic) IBOutlet UILabel *servicePlan;
 
-@property (weak, nonatomic) IBOutlet UISwitch *emailSuccessesSwitch;
-@property (weak, nonatomic) IBOutlet UISwitch *emailFailuresSwitch;
-@property (weak, nonatomic) IBOutlet UISwitch *emailCampaignSwitch;
-@property (weak, nonatomic) IBOutlet UILabel *destinationName;
-@property (weak, nonatomic) IBOutlet UIButton *destinationLogo;
-@property (weak, nonatomic) IBOutlet UILabel *destinationStatus;
+@property (strong, nonatomic) IBOutlet UISwitch *emailSuccessesSwitch;
+@property (strong, nonatomic) IBOutlet UISwitch *emailFailuresSwitch;
+@property (strong, nonatomic) IBOutlet UISwitch *emailCampaignSwitch;
+@property (strong, nonatomic) IBOutlet UILabel *destinationName;
+@property (strong, nonatomic) IBOutlet UIButton *destinationLogo;
+@property (strong, nonatomic) IBOutlet UILabel *destinationStatus;
 
-@property (weak, nonatomic) IBOutlet UILabel *versionOutlet;
-@property (weak, nonatomic) IBOutlet UILabel *hostName;
-@property (weak, nonatomic) IBOutlet UILabel *autoRenewsLabel;
-@property (weak, nonatomic) IBOutlet UILabel *passcodeTitleLabel;
-@property (weak, nonatomic) IBOutlet UILabel *passcodeEnabledLabel;
-@property (weak, nonatomic) IBOutlet UIButton *openDestinationButton;
+@property (strong, nonatomic) IBOutlet UILabel *versionOutlet;
+@property (strong, nonatomic) IBOutlet UILabel *hostName;
+@property (strong, nonatomic) IBOutlet UILabel *autoRenewsLabel;
+@property (strong, nonatomic) IBOutlet UILabel *passcodeTitleLabel;
+@property (strong, nonatomic) IBOutlet UILabel *passcodeEnabledLabel;
+@property (strong, nonatomic) IBOutlet UIButton *openDestinationButton;
 
 @property (strong) NSArray *fieldsToFade;
 
@@ -276,15 +276,14 @@
 {
     UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
     // resuseIdentifier isn't set
-    if ([cell.reuseIdentifier isEqualToString:@"serverConfiguration"]) {
-//        [self pickServer];
-    } else if ([cell.reuseIdentifier isEqualToString:@"passcode"]) {
+    if ([cell.reuseIdentifier isEqualToString:@"passcode"]) {
         KKPasscodeSettingsViewController *vc = [[KKPasscodeSettingsViewController alloc] initWithStyle:UITableViewStyleGrouped];
         vc.delegate = self;
         [self.navigationController pushViewController:vc animated:YES];        
 //        [self.navigationController pushViewController:[[SetPasscodeController alloc] initWithNibName:nil bundle:nil] animated:YES];
     } else if ([cell.reuseIdentifier isEqualToString:@"myAccount"]) {
         SubscriptionViewController *subscriptionView = [[SubscriptionViewController alloc] initWithNibName:nil bundle:nil];
+        subscriptionView.useBackButton = YES;
         [self.navigationController pushViewController:subscriptionView animated:YES];
     }
     else {
@@ -309,16 +308,6 @@
     
     return NO;
 }
-
-//-(void)tableView:(UITableView *)tableView accessoryButtonTappedForRowWithIndexPath:(NSIndexPath *)indexPath {
-//    UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
-//    if ([cell.reuseIdentifier isEqualToString:@"serverConfiguration"]) {
-//        //        [self pickServer];
-//    } else if ([cell.reuseIdentifier isEqualToString:@"passcode"]) {
-//        [self.navigationController pushViewController:[[SetPasscodeController alloc] initWithNibName:nil bundle:nil] animated:YES];
-//    }
-//}
-//
 #pragma mark KKPasscodeSettingsViewControllerDelegate
 
 - (void)didSettingsChanged:(KKPasscodeSettingsViewController*)viewController {

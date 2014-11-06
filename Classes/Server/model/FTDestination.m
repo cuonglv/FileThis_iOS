@@ -19,6 +19,7 @@
 @property NSURL *url;
 @property NSString *logoName;
 @property NSInteger destinationId;
+@property NSString *provider;
 
 @end
 
@@ -33,6 +34,8 @@
         self.name = dictionary[@"name"];
         self.url = [[NSURL alloc] initWithString:dictionary[@"url"]];
         self.logoName = dictionary[@"logo"];
+        self.provider = dictionary[@"provider"];
+        self.type = dictionary[@"type"];
     }
     return self;
 }

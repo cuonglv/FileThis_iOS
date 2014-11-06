@@ -20,6 +20,10 @@
 @property (weak, nonatomic) IBOutlet UICollectionView *institutionsCollection;
 @property (weak, nonatomic) IBOutlet UISearchBar *searchBar;
 @property (weak, nonatomic) IBOutlet NSLayoutConstraint *topLayoutConstrant;
+@property (weak, nonatomic) IBOutlet UISegmentedControl *segmentScope;
+@property (weak, nonatomic) IBOutlet UIButton *btnCancel;
+
+
 @property (strong, nonatomic) ConnectionCredentialsViewController *credentialsViewController;
 @property (strong, nonatomic) UIPopoverController *popover;
 @property (strong) NSArray *allInstitutions;
@@ -54,6 +58,8 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    CLS_LOG(@"%@ viewDidLoad:", [[self class] description]);
+    
     UIBarButtonItem *buttonItem =
     [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel
                                   target:self action:@selector(cancel:)];
@@ -67,8 +73,8 @@
     
     if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0")) { //Cuong
         if(UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {  //iPad
-            self.searchBar.center = CGPointMake(self.searchBar.center.x, self.searchBar.center.y + 20.0);
-            self.institutionsCollection.frame = CGRectMake(self.institutionsCollection.frame.origin.x, self.institutionsCollection.frame.origin.y + 20.0, self.institutionsCollection.frame.size.width, self.institutionsCollection.frame.size.height - 20.0);
+            //self.searchBar.center = CGPointMake(self.searchBar.center.x, self.searchBar.center.y + 20.0);
+            //self.institutionsCollection.frame = CGRectMake(self.institutionsCollection.frame.origin.x, self.institutionsCollection.frame.origin.y + 20.0, self.institutionsCollection.frame.size.width, self.institutionsCollection.frame.size.height - 20.0);
         } else {    //iPhone
             if (self.topLayoutConstrant.constant < 20.0) {
                 self.topLayoutConstrant.constant = 20.0;
@@ -76,6 +82,15 @@
             }
         }
     }
+    self.searchBar.tintColor = kTextOrangeColor;
+    
+    //Apply font for controls
+    self.btnCancel.titleLabel.font = [CommonLayout getFont:16 isBold:YES];
+    float fontSize = 15;
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
+        fontSize = 13;
+    NSDictionary *attributes = [NSDictionary dictionaryWithObject:[CommonLayout getFont:fontSize isBold:NO] forKey:NSFontAttributeName];
+    [self.segmentScope setTitleTextAttributes:attributes forState:UIControlStateNormal];
 }
 
 - (UITextField*)findTextFieldInSubviewsOfView:(UIView*)superView {
@@ -140,7 +155,6 @@
         if (searchBarCancelButton) {
             searchBarCancelButton.hidden = YES;
             
-            //UIButton *newCancelButton =
             [CommonLayout createTextButton:searchBarCancelButton.frame font:searchBarCancelButton.titleLabel.font text:@"Cancel" textColor:[searchBarCancelButton titleColorForState:UIControlStateNormal] touchTarget:self touchSelector:@selector(cancel:) superView:self.searchBar];
         }
     }
@@ -152,7 +166,7 @@
 }
 
 - (void)didReceiveMemoryWarning {
-    // Releases the view if it doesn't have a superview.
+    // Releases the view if it doesn't have a superview. 
     [super didReceiveMemoryWarning];
 }
 
@@ -236,25 +250,25 @@
 
 - (void)keyboardWillShow:(NSNotification *)notification {
     // Reduce the size of the grid view so that it's not obscured by the keyboard.
-    NSDictionary *userInfo = [notification userInfo];
+    /*NSDictionary *userInfo = [notification userInfo];
     
     CGRect endKeyboardRect = [userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue];
     CGRect newFrame = self.institutionsCollection.frame;
     newFrame.size.height -= endKeyboardRect.size.height;
     
-    self.institutionsCollection.frame = newFrame;
+    self.institutionsCollection.frame = newFrame;*/
     [self.institutionsCollection reloadData];
 }
 
 - (void)keyboardWillHide:(NSNotification *)notification {
     // Enlarge the grid view when keyboard disappears.
-    NSDictionary* userInfo = [notification userInfo];
+    /*NSDictionary* userInfo = [notification userInfo];
     CGRect beginKeyboardRect = [userInfo[UIKeyboardFrameBeginUserInfoKey] CGRectValue];
     
     CGRect newFrame = self.institutionsCollection.frame;
     newFrame.size.height += beginKeyboardRect.size.height;
     
-    self.institutionsCollection.frame = newFrame;
+    self.institutionsCollection.frame = newFrame;*/
     [self.institutionsCollection reloadData];
 }
 
@@ -273,7 +287,7 @@
     }
 }
 
-#pragma mark UISearchBarDelegate methods
+#pragma mark - UISearchBarDelegate methods
 
 // called when cancel button pressed
 - (void)searchBarCancelButtonClicked:(UISearchBar *) searchBar {
@@ -320,7 +334,12 @@
     [self filterContentForSearchText:searchBar.text scope:scope];
 }
 
-#pragma mark Content Filtering
+#pragma mark - SegmentControl delegate
+- (IBAction)segmentScopeValueChanged:(UISegmentedControl*)sender {
+    [self searchBar:self.searchBar selectedScopeButtonIndexDidChange:sender.selectedSegmentIndex];
+}
+
+#pragma mark - Content Filtering
 
 - (void)filterContentForSearchText:(NSString*)searchText scope:(NSString*)scope
 {

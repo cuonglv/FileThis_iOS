@@ -28,42 +28,52 @@
 #import "FTQuestion.h"
 #import "QuestionsController.h"
 
-#import "LoadingView.h"
 #import "ConnectionCell.h"
 #import "AddConnectionCell.h"
+#import "AddConnectionTextCell.h"
 #import "Constants.h"
+#import "CommonLayout.h"
+#import "DestinationViewController.h"
+
+#import "CommonFunc.h"
+
+#define kTopExtraRows       0
+#define kBottomExtraRows    1
+
+#define kAlertMessageTag_ExeedConnection    1
 
 @interface ConnectionViewController () <UIActionSheetDelegate, UIAlertViewDelegate, UITableViewDataSource, UITableViewDelegate> {
 }
 
 @property (strong) IBOutlet UITableView *connectionsTable;
-@property (strong) LoadingView *loadingView;
 @property (strong) FTSession *session;
 @property (weak) id settingsObserver;
 @property (strong, nonatomic) NSString *editString;
+@property (strong) UIButton *editButton, *addButton;
+@property int checkLoadingCount;
 @end
 
 @implementation ConnectionViewController
 
 static NSString * const kConnectionCellIdentifier = @"ConnectionCellIdentifier";
 static NSString * const kAddConnectionCellIdentifier = @"AddConnectionCellIdentifier";
+static NSString * const kAddConnectionTextCellIdentifier = @"AddConnectionTextCellIdentifier";
 
 BOOL refreshed = NO;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    self.navigationController.toolbarHidden = NO;
-    self.navigationItem.hidesBackButton = YES;
+    self.navigationController.toolbarHidden = YES;
+    self.loadingView = [[LoadingView alloc] init];
+//    self.navigationItem.hidesBackButton = YES;
     
     self.session = [FTSession sharedSession];
+    self.titleLabel.text = NSLocalizedString(@"ID_CONNECTIONS", @"");
     
-    // customize top navigation bar
-    [self.navigationItem setTitle:NSLocalizedString(@"Connections", @"title for connections view")];
-    UIBarButtonItem *editButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemEdit target:self action:@selector(edit:)];
-    [self.navigationItem setLeftBarButtonItem:editButton];
-    UIBarButtonItem *addButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(add:)];
-    [self.navigationItem setRightBarButtonItem:addButton];
+    self.editButton = [self addTopLeftImageBarButton:[UIImage imageNamed:@"edit_white_icon.png"] width:(IS_IPHONE ? 35 : 40) target:self selector:@selector(edit:)];
+    
+    self.addButton = [self addTopRightImageBarButton:[UIImage imageNamed:@"plus_icon_white.png"] width:36 target:self selector:@selector(add:)];
     
     // customize bottom bar
     [self configureToolbar];
@@ -79,24 +89,25 @@ BOOL refreshed = NO;
     [nc addObserver:self selector:@selector(askUpgrade:) name:FTPremiumFeatureException object:nil];
     [nc addObserver:self selector:@selector(missingDestination:) name:FTMissingCurrentDestination object:nil];
     [nc addObserver:self selector:@selector(createConnectionFailed:) name:FTCreateConnectionFailed object:nil];
+
+    //Removed by Cuong
+//    [nc addObserver:self selector:@selector(fixDestination:) name:FTFixCurrentDestination object:nil];
+//    [nc addObserver:self selector:@selector(destinationConfigured:) name:FTCurrentDestinationUpdated object:nil];
     
-    [nc addObserver:self selector:@selector(fixDestination:) name:FTFixCurrentDestination object:nil];
-    [nc addObserver:self selector:@selector(destinationConfigured:) name:FTCurrentDestinationUpdated object:nil];
-    
-    float topPadding, bottomPadding;
-    if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0")) {
-        topPadding = kIOS7ToolbarHeight;
-        bottomPadding = kIOS7BottomBarHeight;
-    } else {
-        topPadding =  bottomPadding = 0;
+    self.connectionsTable = [[UITableView alloc] initWithFrame:self.contentView.bounds];
+    self.connectionsTable.rowHeight = 80.0;
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
+        self.connectionsTable.rowHeight = 55;
     }
-    self.connectionsTable = [[UITableView alloc] initWithFrame:CGRectMake(0, topPadding, self.view.frame.size.width, self.view.frame.size.height - topPadding - bottomPadding)];
-    self.connectionsTable.rowHeight = 60.0;
-    self.connectionsTable.separatorColor = [UIColor colorWithRed:0.7 green:0.85 blue:0.98 alpha:1.0];
+    self.connectionsTable.separatorColor = kBorderLightGrayColor; //[UIColor colorWithRed:0.7 green:0.85 blue:0.98 alpha:1.0];
     self.connectionsTable.delegate = self;
     self.connectionsTable.dataSource = self;
     self.connectionsTable.allowsSelectionDuringEditing = YES;
-    [self.view addSubview:self.connectionsTable];
+    [self.contentView addSubview:self.connectionsTable];
+    
+    //Reload connection list
+    [FTSession sharedSession].connections = nil;
+    [[FTSession sharedSession] requestConnectionsList];
 }
 
 - (void)viewDidUnload
@@ -108,31 +119,23 @@ BOOL refreshed = NO;
 }
 
 - (void)viewWillAppear:(BOOL)animated {
-    CLS_LOG(@"ConnectionViewController viewWillAppear:");
-    [self.navigationController setToolbarHidden:NO];
-    [self.navigationController setNavigationBarHidden:NO animated:animated];
-    if ([[FTSession sharedSession] connectionsLoaded] == NO)
-        self.loadingView = [LoadingView loadingViewInView:self.connectionsTable];
+    [self.navigationController setToolbarHidden:YES];
+    [self.navigationController setNavigationBarHidden:YES animated:animated];
+    if ([[FTSession sharedSession] connectionsLoaded] == NO) {
+        [self.loadingView startLoadingInView:self.connectionsTable];
+    }
     [super viewWillAppear:animated];
-}
-
-- (void)viewWillDisappear:(BOOL)animated {
-    CLS_LOG(@"ConnectionViewController viewWillDisappear:");
-    [super viewWillDisappear:animated];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
+    
+    self.checkLoadingCount = 0;
+    self.editButton.enabled = NO;
+    self.addButton.enabled = NO;
     [self checkLoadingView:nil];
     
-    float topPadding, bottomPadding;
-    if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0")) {
-        topPadding = kIOS7ToolbarHeight;
-        bottomPadding = kIOS7BottomBarHeight;
-    } else {
-        topPadding =  bottomPadding = 0;
-    }
-    self.connectionsTable.frame = CGRectMake(0, topPadding, self.view.frame.size.width, self.view.frame.size.height-topPadding-bottomPadding);
+    self.connectionsTable.frame = self.contentView.bounds;
     [self.connectionsTable reloadData];
 }
 
@@ -140,42 +143,66 @@ BOOL refreshed = NO;
 	return YES;
 }
 
+- (BOOL)shouldHideToolBar {
+    return YES;
+}
 
-#pragma mark UITableViewDataSource methods
+#pragma mark - Overriden
+- (float)horizontalSpacingBetweenTopLeftBarButtons {
+    if(IS_IPHONE)
+        return 15;
+    
+    return 20;
+}
+
+#pragma mark - Layout
+- (void)relayout
+{
+    [super relayout];
+    self.connectionsTable.frame = self.contentView.bounds;
+}
+
+#pragma mark - UITableViewDataSource methods
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return [[FTSession sharedSession] countConnections] + 1;
+    int count = [[FTSession sharedSession] countConnections];
+    return count + kTopExtraRows + kBottomExtraRows;
 }
 
 // TODO: ref LazyTableImages sample code <http://developer.apple.com/library/ios/#samplecode/LazyTableImages>
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    NSUInteger row = [indexPath row];
-    UITableViewCell *result;
+    int row = [indexPath row];
+    UITableViewCell *result = nil;
     
-    if (row < [[FTSession sharedSession] countConnections])
-    {
-        //NSLog(@"ConnectionViewController - tableView:cellForRowAtIndexPath: %i", indexPath.row);
-        ConnectionCell *cell = [tableView dequeueReusableCellWithIdentifier:kConnectionCellIdentifier];
+    int countConnections = [[FTSession sharedSession] countConnections];
+    
+    if (row < kTopExtraRows) { //Top extra row ("Please select to add a connection")
+        AddConnectionTextCell *cell = (AddConnectionTextCell*)[tableView dequeueReusableCellWithIdentifier:kAddConnectionTextCellIdentifier];
         if (cell == nil) {
-            cell = [[ConnectionCell alloc] initWithTableView:self.connectionsTable reuseIdentifier:kConnectionCellIdentifier];
+            cell = [[AddConnectionTextCell alloc] initWithTableView:tableView reuseIdentifier:kAddConnectionTextCellIdentifier];
         }
-        FTConnection *connectionInfo = [[FTSession sharedSession] connectionAtIndex:row];
-        [cell setConnection:connectionInfo withEditing:tableView.isEditing];
-        cell.host = self;
         result = cell;
-    } else {
-        NSUInteger diff = row - [[FTSession sharedSession] countConnections];
+    } else if (row > countConnections - 1 + (int)kTopExtraRows) { //Bottom extra row ("Add new Connection")
         AddConnectionCell *cell = (AddConnectionCell*)[tableView dequeueReusableCellWithIdentifier:kAddConnectionCellIdentifier];
         if (cell == nil) {
             cell = [[AddConnectionCell alloc] initWithTableView:tableView reuseIdentifier:kAddConnectionCellIdentifier];
         }
-        
-        switch (diff) {
-            case 0:
-                break;
-            case 2:
-                break;
-        }
+        //[cell layoutSubviewsByWidth:self.connectionsTable.frame.size.width];
         result = cell;
+    } else { //Normal row (real connection data)
+        ConnectionCell *cell = [tableView dequeueReusableCellWithIdentifier:kConnectionCellIdentifier];
+        if (cell == nil) {
+            cell = [[[CommonFunc idiomClassWithName:@"ConnectionCell"] alloc] initWithTableView:self.connectionsTable reuseIdentifier:kConnectionCellIdentifier];
+        }
+        //if (row < countConnections) { //check by Cuong to avoid crash
+            FTConnection *connectionInfo = [[FTSession sharedSession] connectionAtIndex:row - kTopExtraRows];
+        if (connectionInfo) {
+            [cell setConnection:connectionInfo withEditing:tableView.isEditing];
+        }
+        
+            cell.host = self;
+        //}
+        result = cell;
+        
     }
     
     return result;
@@ -183,30 +210,33 @@ BOOL refreshed = NO;
 
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
     if (editingStyle == UITableViewCellEditingStyleDelete) {
-        // try to delete
-        if ([self.session deleteNthInstitutionConnection:indexPath.row]) {
-            NSArray *indexPaths = [[NSArray alloc] initWithObjects:indexPath, nil];
-            [tableView deleteRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationFade];
+        //Check if connection is in process
+        FTConnection *connectionInfo = [[FTSession sharedSession] connectionAtIndex:indexPath.row - kTopExtraRows];
+        CLS_LOG(@"ConnectionVC - commit cell editting style, index: %i, connection id: %li, name: %@", indexPath.row, connectionInfo.connectionId, connectionInfo.name);
+        if (connectionInfo.isTransitioning) { //Is in process: show alert
+            [CommonLayout showAlertMessageWithTitle:nil content:NSLocalizedString(@"ID_CONNECTION_BEING_PROCESSED", @"") delegate:nil cancelButtonTitle:NSLocalizedString(@"ID_OK", @"") otherButtonTitle:nil];
+        } else { //try to delete
+            if ([self.session deleteNthInstitutionConnection:indexPath.row]) {
+                NSArray *indexPaths = [[NSArray alloc] initWithObjects:indexPath, nil];
+                [tableView deleteRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationFade];
+            }
         }
     }
 }
 
 - (void)tableView:(UITableView *)tableView accessoryButtonTappedForRowWithIndexPath:(NSIndexPath *)indexPath {
-    if (tableView.isEditing == YES) {
-        // refresh
-        [self refreshConnection:indexPath withTableView:(UITableView *)tableView];
-    } else {
-        [self refreshConnection:indexPath withTableView:(UITableView *)tableView];
-//        NSUInteger row = [indexPath row];
-//        FTConnection *connection = [[FTSession sharedSession] connectionAtIndex:row];
-//        if ([connection hasError] || [connection hasQuestion])
-//        {
-//            
-//        } else {
-//            NSLog(@"TODO: display details window");
-//        }
-//
-    }
+    [self refreshConnection:indexPath withTableView:(UITableView *)tableView];
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (indexPath.row < kTopExtraRows)
+        return 0;   //temporary hide by Cuong (UI not suitable)
+    
+    if (indexPath.row > [FTSession sharedSession].countConnections - 1 + kTopExtraRows)
+        return kAddConnectionCellHeight;
+    
+    return tableView.rowHeight;
 }
 
 - (IBAction)accessoryButtonTapped:(id)sender withEvent:(id)event
@@ -221,14 +251,49 @@ BOOL refreshed = NO;
 	}
 }
 
-- (BOOL)tableView:(UITableView *)tableView shouldHighlightRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    //NSLog(@"touched row %d", indexPath.row);
+//- (BOOL)tableView:(UITableView *)tableView shouldHighlightRowAtIndexPath:(NSIndexPath *)indexPath
+//{
+//    //NSLog(@"touched row %d", indexPath.row);
+//    NSUInteger row = [indexPath row];
+//    int dataIndex = row - kTopExtraRows;
+//    if ([self isConnectionCell:dataIndex]) {
+//        FTConnection *connection = [[FTSession sharedSession] connectionAtIndex:dataIndex];
+//        if (tableView.isEditing) {
+//            [self performSegueWithIdentifier:@"editConnection" sender:connection];
+//        } else if (connection.hasQuestion) {
+//            ConnectionCell *cell = (ConnectionCell *)[tableView cellForRowAtIndexPath:indexPath];
+//            [self askQuestionsForConnectionCell:cell];
+//        } else if (connection.hasError) {
+//            ConnectionCell *cell = (ConnectionCell *)[tableView cellForRowAtIndexPath:indexPath];
+//            [self displayConnectionError:cell];
+//        }
+//    } else {
+//        /*NSUInteger diff = row - [[FTSession sharedSession] countConnections];
+//        switch (diff) {
+//            case 0:
+//                [self add:self];
+//                break;
+//            case 2:
+//                break;
+//        }*/
+//        [self add:self];
+//    }
+//    return NO;
+//}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     NSUInteger row = [indexPath row];
-    if ([self isConnectionCell:indexPath]) {
-        FTConnection *connection = [[FTSession sharedSession] connectionAtIndex:row];
+    int dataIndex = row - kTopExtraRows;
+    if ([self isConnectionCell:dataIndex]) {
+        FTConnection *connection = [[FTSession sharedSession] connectionAtIndex:dataIndex];
         if (tableView.isEditing) {
-            [self performSegueWithIdentifier:@"editConnection" sender:connection];
+            FTConnection *connectionInfo = [[FTSession sharedSession] connectionAtIndex:indexPath.row - kTopExtraRows];
+            if (connectionInfo.isTransitioning) { //Is in process: show alert
+                [CommonLayout showAlertMessageWithTitle:nil content:NSLocalizedString(@"ID_CONNECTION_WAIT_TO_EDIT", @"") delegate:nil cancelButtonTitle:NSLocalizedString(@"ID_OK", @"") otherButtonTitle:nil];
+            } else {
+                CLS_LOG(@"Edit connection, index: %i, connection id: %li, name: %@", indexPath.row, connectionInfo.connectionId, connectionInfo.name);
+                [self performSegueWithIdentifier:@"editConnection" sender:connection];
+            }
         } else if (connection.hasQuestion) {
             ConnectionCell *cell = (ConnectionCell *)[tableView cellForRowAtIndexPath:indexPath];
             [self askQuestionsForConnectionCell:cell];
@@ -237,27 +302,31 @@ BOOL refreshed = NO;
             [self displayConnectionError:cell];
         }
     } else {
-        NSUInteger diff = row - [[FTSession sharedSession] countConnections];
-        switch (diff) {
-            case 0:
-                [self add:self];
-                break;
-            case 2:
-                break;
+        if ([[FTSession sharedSession] connectionsLoaded]) {
+            [self add:self];
         }
     }
-    return NO;
+
+    [self performSelector:@selector(deselectCell:) withObject:indexPath afterDelay:0.2];
+}
+
+- (void)deselectCell:(NSIndexPath*)indexPath {
+    [self.connectionsTable deselectRowAtIndexPath:indexPath animated:NO];
 }
 
 - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
-    if ([self isConnectionCell:indexPath])
-        return YES;
-    else  // disable editing for our static "Add Connection" row
+    int dataIndex = indexPath.row - kTopExtraRows;
+    BOOL isConnection = [self isConnectionCell:dataIndex];
+    if (!isConnection)
         return NO;
+    FTConnection *connectionInfo = [[FTSession sharedSession] connectionAtIndex:indexPath.row - kTopExtraRows];
+    if (connectionInfo.isTransitioning)
+        return NO;
+    return YES;
 }
 
-- (BOOL)isConnectionCell:(NSIndexPath *)path {
-    return (path.row < [[FTSession sharedSession] countConnections]);
+- (BOOL)isConnectionCell:(int)index {
+    return (index < [[FTSession sharedSession] countConnections]);
 }
 
 - (NSString *)lastUpdatedString {
@@ -363,27 +432,27 @@ BOOL refreshed = NO;
 }
 
 - (void)configureToolbar {
-    NSString *title = NSLocalizedString(@"Account", @"button title");
-    UIBarButtonItem *accountButton = [[UIBarButtonItem alloc]
-                                      initWithTitle:title style:UIBarButtonItemStyleBordered
-                                      target:self action:@selector(settings:)];
-    title = NSLocalizedString(@"Logout", @"button title");
-    UIBarButtonItem *logoutButton = [[UIBarButtonItem alloc]
-                                     initWithTitle:title style:UIBarButtonItemStyleBordered
-                                     target:self action:@selector(logout:)];
-    UIBarButtonItem *flexibleSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
-    UIBarButtonItem *documentsButton;
-    NSArray *items = @[accountButton, flexibleSpace, logoutButton];
-    if ([FTSession sharedSession].currentDestination != nil && [[FTSession sharedSession].currentDestination canLaunchToDocuments]) {
-        title = NSLocalizedString(@"Documents", @"Documents button title");
-        documentsButton = [[UIBarButtonItem alloc]
-                           initWithTitle:title style:UIBarButtonItemStyleBordered
-                           target:self action:@selector(launchToDocuments:)];
-        UIBarButtonItem *flexibleSpace2 = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
-        items = @[accountButton, flexibleSpace, documentsButton, flexibleSpace2, logoutButton];
-    }
-    
-    [self setToolbarItems:items];
+//    NSString *title = NSLocalizedString(@"Account", @"button title");
+//    UIBarButtonItem *accountButton = [[UIBarButtonItem alloc]
+//                                      initWithTitle:title style:UIBarButtonItemStyleBordered
+//                                      target:self action:@selector(settings:)];
+//    title = NSLocalizedString(@"Logout", @"button title");
+//    UIBarButtonItem *logoutButton = [[UIBarButtonItem alloc]
+//                                     initWithTitle:title style:UIBarButtonItemStyleBordered
+//                                     target:self action:@selector(logout:)];
+//    UIBarButtonItem *flexibleSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
+//    UIBarButtonItem *documentsButton;
+//    NSArray *items = @[accountButton, flexibleSpace, logoutButton];
+//    if ([FTSession sharedSession].currentDestination != nil && [[FTSession sharedSession].currentDestination canLaunchToDocuments]) {
+//        title = NSLocalizedString(@"Documents", @"Documents button title");
+//        documentsButton = [[UIBarButtonItem alloc]
+//                           initWithTitle:title style:UIBarButtonItemStyleBordered
+//                           target:self action:@selector(launchToDocuments:)];
+//        UIBarButtonItem *flexibleSpace2 = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
+//        items = @[accountButton, flexibleSpace, documentsButton, flexibleSpace2, logoutButton];
+//    }
+//    
+//    [self setToolbarItems:items];
 }
 
 - (IBAction)destinationConfigured:(NSNotification *)notification
@@ -392,7 +461,7 @@ BOOL refreshed = NO;
 }
 
 - (IBAction)refresh:(id)sender {
-    [self removeLoadingView];
+    [self.loadingView stopLoading];
     [self.connectionsTable reloadData];
     [self.connectionsTable setNeedsDisplay]; // repaint
 }
@@ -413,15 +482,23 @@ BOOL refreshed = NO;
     NSString *animationType = kCATransitionFade;
     NSString *animationSubtype = kCATransitionFromLeft;
     if (!editing) {
-        self.navigationItem.leftBarButtonItem =
-        [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemEdit target:self action:@selector(edit:)];
-        animationSubtype = kCATransitionFromLeft;
+//        self.navigationItem.leftBarButtonItem =
+//        [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemEdit target:self action:@selector(edit:)];
+//        animationSubtype = kCATransitionFromLeft;
+        CLS_LOG(@"ConnectionVC - touch Done button");
+        [self.editButton setTitle:@"" forState:UIControlStateNormal];
+        [self.editButton setImage:[UIImage imageNamed:@"edit_white_icon.png"] forState:UIControlStateNormal];
+        [self.editButton setWidth:40];
     }
     else
     {
-        self.navigationItem.leftBarButtonItem =
-        [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(edit:)];
-        animationSubtype = kCATransitionFromRight;
+//        self.navigationItem.leftBarButtonItem =
+//        [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(edit:)];
+//        animationSubtype = kCATransitionFromRight;
+        CLS_LOG(@"ConnectionVC - touch Edit button");
+        [self.editButton setTitle:@"Done" forState:UIControlStateNormal];
+        [self.editButton setImage:nil forState:UIControlStateNormal];
+        [self.editButton autoWidth];
     }
     
 	// Set up the animation
@@ -464,45 +541,50 @@ BOOL refreshed = NO;
 }
 
 - (void)didAdd:(AddConnectionViewController *)addConnectionViewController {
-    //    [self.navigationController popToViewController:self animated:YES];
-    [(FTMobileAppDelegate*)[UIApplication sharedApplication].delegate resetConnectionViewController];
-}
-
-- (void)removeLoadingView
-{
-    if (self.loadingView) {
-        [self.loadingView removeView];
-        self.loadingView = NULL;
-    }
+    [self.navigationController popToViewController:self animated:YES];
+    [self.connectionsTable reloadData];
+    [self.connectionsTable setNeedsDisplay];
 }
 
 - (void)checkLoadingView:(id)sender
 {
-    if (self.loadingView != NULL) {
-        // check to see if session has got back connections
-        if ([[FTSession sharedSession] connectionsLoaded]) {
-            [self removeLoadingView];
-        } else {
+    // check to see if session has got back connections
+    if ([[FTSession sharedSession] connectionsLoaded]) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.loadingView stopLoading];
+            self.editButton.enabled = YES;
+            self.addButton.enabled = YES;
+        });
+    } else {
+        if (self.checkLoadingCount < 20) {
+            self.checkLoadingCount++;
             [self performSelector:@selector(checkLoadingView:) withObject:nil afterDelay:0.5];
+        } else {
+            [[FTSession sharedSession] cancelRequestConnectionsList];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self.loadingView stopLoading];
+                self.editButton.enabled = NO;
+                self.addButton.enabled = NO;
+            });
         }
     }
 }
 
 - (void)dataChangedNotification:(NSNotification *)notification {
     if (!refreshed) {
-#ifdef DEBUG
+#ifdef ENABLE_NSLOG_REQUEST
         NSLog(@"Connections loaded in %f seconds. ", CFAbsoluteTimeGetCurrent() - gStartTime);
 #endif
         refreshed = YES;
     }
-#ifdef DEBUG
+#ifdef ENABLE_NSLOG_REQUEST
     NSLog(@"%@ changed. Refreshing table", notification.name);
 #endif
     [self performSelectorOnMainThread:@selector(refresh:) withObject:nil waitUntilDone:NO];
 }
 
 - (IBAction)questionCancelled:(FTQuestion *)question {
-#ifdef DEBUG
+#ifdef ENABLE_NSLOG_REQUEST
     NSLog(@"question %@ cancelled", question);
 #endif
 }
@@ -513,6 +595,7 @@ BOOL refreshed = NO;
 
 #pragma mark - Connection Settings
 -(void)editConnection:(FTConnection *)connection {
+    CLS_LOG(@"Edit connection, id:%li, name: %@", connection.connectionId, connection.name);
     UIStoryboard *storyboard = [UIApplication sharedApplication].delegate.window.rootViewController.storyboard;
     ConnectionSettingsViewController *vc = [storyboard instantiateViewControllerWithIdentifier:@"ConnectionSettings"];
     vc.connection = connection;
@@ -523,13 +606,14 @@ BOOL refreshed = NO;
 
 #pragma  mark - Notification listeners
 // TODO: does this belong in FTSession?
+// [manhnn] Yes, it does. Because the gotQuestions signal will be not received, if ConnectionViewController is not loaded yet.
 - (void)gotQuestions:(NSNotification *)notification {
-    NSArray *questions = notification.object;
-    for (FTQuestion *question in questions) {
-        FTConnection *connection = [self.session findConnectionById:question.connectionId];
-        NSAssert1(connection != nil, @"couldn't find connection with id=%d?", question.connectionId);
-        [connection addQuestion:question];
-    }
+//    NSArray *questions = notification.object;
+//    for (FTQuestion *question in questions) {
+//        FTConnection *connection = [self.session findConnectionById:question.connectionId];
+//        NSAssert1(connection != nil, @"couldn't find connection with id=%d?", question.connectionId);
+//        [connection addQuestion:question];
+//    }
 }
 
 - (void)answeredQuestion:(NSNotification *)notification {
@@ -538,6 +622,7 @@ BOOL refreshed = NO;
 
 - (void)removeConnection:(FTConnection *)connection {
     assert([NSThread isMainThread]);
+    CLS_LOG(@"Try to remove connection, id: %li, name: %@", connection.connectionId, connection.name);
     NSInteger numConnections = self.session.countConnections;
     for (NSInteger row = 0; row != numConnections; row++) {
         FTConnection *c = [self.session connectionAtIndex:row];
@@ -547,20 +632,22 @@ BOOL refreshed = NO;
             NSIndexPath *indexPath = [NSIndexPath indexPathForRow:row inSection:0];
             NSArray *indexPaths = [[NSArray alloc] initWithObjects:indexPath, nil];
             [self.connectionsTable deleteRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationFade];
+            CLS_LOG(@"Removed connection from UI, id: %li, name: %@", connection.connectionId, connection.name);
             return;
         }
     }
     
-    NSAssert(NO, @"Couldn't find row containing connection to delete. Connection=%@", connection.key);
+    //NSAssert(NO, @"Couldn't find row containing connection to delete. Connection=%@", connection.key);
 }
 
 - (void)connectionDeleted:(NSNotification *)notification {
     FTConnection *connection = notification.object;
+    CLS_LOG(@"Deleted connection, id: %li, name: %@", connection.connectionId, connection.name);
     [self performSelectorOnMainThread:@selector(removeConnection:) withObject:connection waitUntilDone:NO];
 }
 
 - (void)connectionUpdated:(NSNotification *)notification {
-    FTConnection *connection = notification.object;
+    /*FTConnection *connection = notification.object;
     NSMutableArray *indices = [NSMutableArray arrayWithCapacity:[FTSession sharedSession].connections.count];
     [[FTSession sharedSession].connections
         enumerateObjectsUsingBlock: ^(FTConnection *conn, NSUInteger idx, BOOL *stop) {
@@ -569,11 +656,14 @@ BOOL refreshed = NO;
             }
         }];
     NSAssert([NSThread isMainThread], @"running on main thread");
-    [self.connectionsTable reloadRowsAtIndexPaths:indices withRowAnimation:UITableViewRowAnimationFade];
+    [self.connectionsTable reloadRowsAtIndexPaths:indices withRowAnimation:UITableViewRowAnimationFade];*/
+    
+    CLS_LOG(@"Updated connection");
+    [self.connectionsTable reloadData];
 }
 
 - (void)refreshInstitution:(NSNotification *)notification {
-    FTInstitution *refreshedInstitution = notification.object;
+    /*FTInstitution *refreshedInstitution = notification.object;
     int c = [[FTSession sharedSession] countConnections];
     while (c-- > 0) {
         FTConnection *connection = [[FTSession sharedSession] connectionAtIndex:c];
@@ -584,11 +674,15 @@ BOOL refreshed = NO;
             NSArray *indexPaths = @[ [NSIndexPath indexPathForRow:c inSection:0] ];
             [self.connectionsTable reloadRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationFade];
         }
-    }
+    }*/
+    
+    CLS_LOG(@"Refresh institution");
+    [self.connectionsTable reloadData];
 }
 
 - (void)askToUpgrade:(NSString *)title withMessage:(NSString *)message withButton:(NSString *)buttonTitle {
     dispatch_block_t block = ^{
+        CLS_LOG(@"Ask to upgrade");
         [[[UIAlertView alloc] initWithTitle:title message:message completionBlock:^(NSUInteger buttonIndex, UIAlertView *alertView) {
             if (buttonIndex == 1) {
                 // if User has Premium, they cannot upgrade to Ultimate.
@@ -596,6 +690,7 @@ BOOL refreshed = NO;
                 //                    TFLog(@"User %@ has ");
                 // If user is Basic, then take them to upgrade page...
                 SubscriptionViewController *subscriptionView = [[SubscriptionViewController alloc] init];
+                subscriptionView.useBackButton = YES;
                 [self.navigationController pushViewController:subscriptionView animated:YES];
             }
         } cancelButtonTitle:@"Cancel" otherButtonTitles:buttonTitle, nil] show];
@@ -605,13 +700,21 @@ BOOL refreshed = NO;
 
 - (void)askUpgrade:(NSNotification *)sender
 {
-    NSString *message = sender.object[@"errorMessage"];
+    /*NSString *message = sender.object[@"errorMessage"];
     NSString *title = NSLocalizedString(@"Cannot Add Connection", @"alert title");
     NSString *button = NSLocalizedString(@"Upgrade", @"button title");
-    [self askToUpgrade:title withMessage:message withButton:button];
+    [self askToUpgrade:title withMessage:message withButton:button];*/
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        CLS_LOG(@"Ask upgrade");
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"More Connections Needed" message:NSLocalizedString(@"ID_WARNING_EXCEED_CONNECTION", @"") delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:NSLocalizedString(@"ID_OPTION_UPGRADE", @""), NSLocalizedString(@"ID_OPTION_INVITE", @""), nil];
+        alert.tag = kAlertMessageTag_ExeedConnection;
+        [alert show];
+    });
 }
 
 - (void)missingDestination:(NSNotification *)notification {
+    CLS_LOG(@"Missing destination");
     NSString *title = NSLocalizedString(@"Configure Destination", @"alert title when missing destination");
     NSString *m = NSLocalizedString(@"please configure your destination", @"missing destination");
     dispatch_block_t b = ^{
@@ -628,6 +731,7 @@ BOOL refreshed = NO;
 
 - (void)fixDestination:(NSNotification *)notification {
     FTDestinationConnection *currentDestination = notification.object;
+    CLS_LOG(@"Fix destination, id: %i, name: %@", currentDestination.destinationId, currentDestination.name);
     NSString *title = NSLocalizedString(@"Configure Destination", @"alert title for fix destination");
     
     NSString *message = nil;
@@ -641,7 +745,9 @@ BOOL refreshed = NO;
         [[[UIAlertView alloc] initWithTitle:title message:message
             completionBlock:^(NSUInteger buttonIndex, UIAlertView *alertView) {
                 if (buttonIndex == 1) {
-                    [self performSegueWithIdentifier:@"pickDestination" sender:self];
+                    //[self performSegueWithIdentifier:@"pickDestination" sender:self];
+                    [DestinationViewController setGoFromFixIt:YES];
+                    [(FTMobileAppDelegate*)[UIApplication sharedApplication].delegate selectMenu:MenuItemDestination animated:YES];
                 }
             }
             cancelButtonTitle:@"Cancel" otherButtonTitles:@"Fix it", nil] show];
@@ -650,6 +756,7 @@ BOOL refreshed = NO;
 }
 
 - (void)createConnectionFailed:(NSNotification *)notification {
+    CLS_LOG(@"Create connection failed");
     NSString *title = NSLocalizedString(@"Cannot Add Connection", "alert title when create connection fails");
     NSString *exception = notification.userInfo[@"errorType"];
     if ([exception isEqualToString:FTAccountExpiredException]) {
@@ -685,11 +792,11 @@ BOOL refreshed = NO;
 - (void)refreshConnection:(NSIndexPath *)indexPath withTableView:(UITableView *)tableView {
     NSUInteger row = [indexPath row];
     FTConnection *connection = [[FTSession sharedSession] connectionAtIndex:row];
-    
+    CLS_LOG(@"Refresh connection, id: %li, name: %@", connection.connectionId, connection.name);
     if ([connection hasQuestion]) {
     
     } else if ([connection hasError]) {
-#ifdef DEBUG
+#ifdef ENABLE_NSLOG_REQUEST
         NSLog(@"put up dialog asking question...");
 #endif
     } else {
@@ -700,13 +807,14 @@ BOOL refreshed = NO;
 - (void)displayConnectionError:(ConnectionCell *)cell
 {
     FTConnection *connection = cell.connection;
+    CLS_LOG(@"Display error for connection, id: %li, name: %@", connection.connectionId, connection.name);
     ConnectionErrorViewController *errorAlert = [[ConnectionErrorViewController alloc] initWithNibName:nil bundle:nil];
     [errorAlert setConnection:connection];
     
     if(UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
         errorAlert.popover = [[UIPopoverController alloc] initWithContentViewController:errorAlert];
         errorAlert.popover.delegate = errorAlert;
-#ifdef DEBUG
+#ifdef ENABLE_NSLOG_REQUEST
         NSLog(@"error alert is %@", NSStringFromCGRect(errorAlert.view.frame));
 #endif
         errorAlert.popover.popoverContentSize = CGSizeMake(320., 400);
@@ -730,6 +838,7 @@ BOOL refreshed = NO;
 
 -(IBAction)askQuestionsForConnectionCell:(ConnectionCell *)cell {
     FTConnection *connection = cell.connection;
+    CLS_LOG(@"Ask question for connection, id: %li, name: %@", connection.connectionId, connection.name);
     if ([connection.questions count] != 0) {
         
         //            // Setup the popover for use in the detail view.
@@ -743,6 +852,7 @@ BOOL refreshed = NO;
 //        rowRect.origin.y += rowRect.size.height / 2;
         rowRect.size.width = cell.nameLabel.frame.origin.x - cell.frame.origin.x;
         
+        rowRect = [self.connectionsTable convertRect:rowRect toView:self.view];
         [QuestionsController askQuestions:connection.questions
                        fromViewController:self
                                  fromRect:rowRect
@@ -805,9 +915,19 @@ BOOL refreshed = NO;
 #pragma mark - UIAlertViewDelegate methods
 - (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex
 {
-#ifdef DEBUG
+#ifdef ENABLE_NSLOG_REQUEST
     NSLog(@"button #%d clicked in alert", buttonIndex);
 #endif
+    
+    if (alertView.tag == kAlertMessageTag_ExeedConnection) {
+        NSLog(@"%d", buttonIndex);
+        FTMobileAppDelegate *app = (FTMobileAppDelegate*)[UIApplication sharedApplication].delegate;
+        if (buttonIndex == 1) { //Upgrade
+            [app gotoPurchase];
+        } else if (buttonIndex == 2) { //Invite new friend
+            [app goToInviteFriend];
+        }
+    }
 }
 
 #pragma mark - UIActionSheetDelegate methods
@@ -815,7 +935,7 @@ BOOL refreshed = NO;
 // Called when a button is clicked. The view will be automatically dismissed after this call returns
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
 {
-#ifdef DEBUG
+#ifdef ENABLE_NSLOG_REQUEST
     NSLog(@"button #%d clicked in action sheet", buttonIndex);
 #endif
 }
@@ -835,26 +955,26 @@ BOOL refreshed = NO;
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
-#ifdef DEBUG
-    NSLog(@"touches began(%@) with %@", touches, event);
-#endif
+//#ifdef DEBUG
+//    NSLog(@"touches began(%@) with %@", touches, event);
+//#endif
     [super touchesBegan:touches withEvent:event];  //let the tableview handle cell selection
     //    [self.nextResponder touchesBegan:touches withEvent:event]; // give the controller a chance for handling touch events
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
-#ifdef DEBUG
-    NSLog(@"touchesEnded(%@) with %@", touches, event);
-#endif
+//#ifdef DEBUG
+//    NSLog(@"touchesEnded(%@) with %@", touches, event);
+//#endif
     [super touchesEnded:touches withEvent:event];
 }
 
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
 {
-#ifdef DEBUG
-    NSLog(@"touches cancelled(%@) with %@", touches, event);
-#endif
+//#ifdef DEBUG
+//    NSLog(@"touches cancelled(%@) with %@", touches, event);
+//#endif
     [super touchesCancelled:touches withEvent:event];
 }
 

@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "Constants.h"
-
+#import "SortCriteriaObject.h"
 
 typedef enum {
     ThumbnailSizeSmall,
@@ -64,10 +64,6 @@ typedef enum {
 + (void)setCabId:(int)value;
 
 #pragma mark -
-+ (NSString*)sortBy;
-+ (void)setSortBy:(NSString*)value;
-
-#pragma mark -
 + (BOOL)sortDescending;
 + (void)setSortDescending:(BOOL)value;
 
@@ -76,6 +72,13 @@ typedef enum {
 + (CabinetType)cabType;
 + (void)setCabType:(CabinetType)value;
  */
+
+#pragma mark -
++ (SORTBY)getSortDocumentBy;
++ (void)setSortDocumentBy:(SORTBY)sortBy;
+
++ (int)getDocumentOptionView;
++ (void)setDocumentOptionView:(int)showView;
 
 #pragma mark -
 #pragma mark Thumb Files
@@ -117,4 +120,17 @@ typedef enum {
 #pragma mark Account Info
 + (void)loadAccountInfo;
 + (NSDictionary*)dictAccountInfo;
+
+
++ (void)setStoryboard:(UIStoryboard*)storyboard;
++ (UIStoryboard *)storyboard;
+
++ (BOOL)needToReloadAllDocuments;
++ (void)setNeedToReloadAllDocuments:(BOOL)val;
+
++ (BOOL)lockedOrientation;
++ (void)setLockedOrientation:(BOOL)val;
+
++ (BOOL)isShowingMenu;
++ (void)setIsShowingMenu:(BOOL)val;
 @end

@@ -29,6 +29,8 @@
     return nil;
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 - (NSDictionary *)purchaseInfo {
     NSDictionary *purchaseInfo = nil;
     if (self.transactionReceipt) {
@@ -71,6 +73,7 @@
     }
     return s;
 }
+#pragma GCC diagnostic pop
 
 - (NSNumber *)expiration {
     NSDictionary *info = [self purchaseInfo];
@@ -189,14 +192,14 @@
         return;
     
     // resume processing when user logs in.
-#ifdef DEBUG
+#ifdef ENABLE_NSLOG_REQUEST
     NSLog(@"processing %d transactions", transactions.count);
 #endif
     for (SKPaymentTransaction *transaction in transactions) {
         switch (transaction.transactionState) {
                 // Transaction was restored from user's purchase history.
             case SKPaymentTransactionStateRestored:
-#ifdef DEBUG
+#ifdef ENABLE_NSLOG_REQUEST
                 NSLog(@"restoring transaction %@", [transaction ftDescription]);
 #endif
                 [self restoreTransaction:transaction];
@@ -208,14 +211,14 @@
                 break;
                 // Transaction was cancelled or failed before being added to the server queue.
             case SKPaymentTransactionStateFailed:
-#ifdef DEBUG
+#ifdef ENABLE_NSLOG_REQUEST
                 NSLog(@"failed transaction %@", [transaction ftDescription]);
 #endif
                 [self failedTransaction:transaction];
                 break;
                 // Transaction is being added to the server queue.
             case SKPaymentTransactionStatePurchasing:
-#ifdef DEBUG
+#ifdef ENABLE_NSLOG_REQUEST
                 NSLog(@"purchasing transaction %@", transaction.payment.productIdentifier);
 #endif
                 break;
@@ -238,7 +241,7 @@
 // Sent when all transactions from the user's purchase history have successfully been added back to the queue.
 - (void)paymentQueueRestoreCompletedTransactionsFinished:(SKPaymentQueue *)queue
 {
-#ifdef DEBUG
+#ifdef ENABLE_NSLOG_REQUEST
     NSLog(@"restored transactions");
 #endif
     [self paymentQueue:queue updatedTransactions:queue.transactions];
@@ -297,7 +300,7 @@
 
 - (void)recordTransaction:(SKPaymentTransaction *)transaction
 {
-#ifdef DEBUG
+#ifdef ENABLE_NSLOG_REQUEST
     NSLog(@"recording %@", [transaction ftDescription]);
 #endif
     [[FTSession sharedSession] purchase:transaction

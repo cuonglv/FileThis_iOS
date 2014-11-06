@@ -29,7 +29,6 @@
 #import "CommonFunc.h"
 #import "CommonVar.h"
 #import "TagController.h"
-#import "DocumentController.h"
 #import "Layout.h"
 
 #import "DestinationPickerViewController.h"
@@ -475,14 +474,6 @@ typedef enum {
 //    }
 //}
 //
-- (void)gotoDocumentScreen {
-    blnFirstLoad = NO;
-    [CommonVar setRequestURL:[kServer stringByAppendingFormat:@"json=true&compact=false&ticket=%@&op=", [CommonVar ticket]]];
-    DocumentController *dc = [[DocumentController alloc] initWithNibName:@"DocumentController" bundle:[NSBundle mainBundle]];
-    [CommonVar setDocCon:dc];
-    [self.navigationController pushViewController:dc animated:YES];
-}
-
 - (void)gotoConnectionsView {
     // hide us
     [self dismissViewControllerAnimated:YES completion:nil];

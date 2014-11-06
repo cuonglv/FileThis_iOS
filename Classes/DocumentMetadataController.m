@@ -7,7 +7,7 @@
 //
 
 #import "DocumentMetadataController.h"
-
+#import <Crashlytics/Crashlytics.h>
 
 @implementation DocumentMetadataController
 
@@ -55,6 +55,9 @@
     
 }
 
-
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    CLS_LOG(@"%@ viewDidLoad:", [[self class] description]);
+}
 
 @end

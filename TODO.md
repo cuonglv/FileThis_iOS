@@ -3,8 +3,6 @@ Hook up Passcode UI
 Only update connections from ConnectionView controller
 
 
-
-
 - login requests (institutions), connections, (destinations), and current destination, but doesn't block.
   don't check connections, or current destination at login
 
